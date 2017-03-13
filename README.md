@@ -37,7 +37,7 @@
 **NOTE** you generate new/individual settings profile using following command:
 
   ```bash
-  ant createConfig -DHYBRIS_CONFIG_DIR=`pwd`/config/<profile> -Dinput.template=<develop or production>
+  ant createConfig -DHYBRIS_CONFIG_DIR=`pwd`/config/<profile> -Dinput.template=<develop|production>
   ```
 
 ### OOTB MOD
