@@ -17,6 +17,7 @@
   `HYBRIS_CONFIG_DIR` - CLI argument > System.env > default (config/develop).
 ====================================================================
 -->
+  <!-- READONLY System environment variables -->
   <property environment="env"/>
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="hybrisserver.sh">
@@ -28,9 +29,6 @@
   <property name="dir.config" value="${basedir}/config" />
   <property name="dir.tmp"    value="${java.io.tmpdir}"/>
 
-  <!-- Hybris package source directory - CLI > System.env. -->
-  <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_SRC"/>
-
   <!-- Native Hybris config profiles - CLI > System.env > default. -->
   <condition property="HYBRIS_CONFIG_DIR" 
       value="${env.HYBRIS_CONFIG_DIR}" 
@@ -39,37 +37,39 @@
     <isset property="env.HYBRIS_CONFIG_DIR"/>
   </condition>
 
+  <!-- Hybris package source directory - CLI > System.env. -->
+  <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_SRC"/>
+
   <!-- try load Hybris OOTB `ant-contrib`. -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml"
       classpath="${HYB_BIN_DIR}/platform/lib/ant-contrib-1.0b3.jar" />
 
 <!--
 =====================================================================
-  Project Properties
+  Project Settings. 
 =====================================================================
 -->
   <condition property="platform.exists">
     <available file="${platformhome}" type="dir" />
   </condition>
 
-  <condition property="dotenv.exists">
-    <available file="${basedir}/.env" type="file"/>
-  </condition>
-
-  <condition property="config.exists">
-    <available file="${dir.config}" type="dir"/>
-  </condition>
-
   <!-- import Hybris OOTB `ant` build.xml directly (if exists)
   also avoid missing config folder issue (auto. config generation).
   -->
   <if>
-    <isset property="config.exists" />
+    <available file="${dir.config}" type="dir"/>
     <then>
       <import file="${platformhome}/build.xml" optional="true" />
     </then>
   </if>
 
+  <!-- dotenv supports -->
+  <if>
+    <available file="${basedir}/.env" type="file" />
+    <then>
+      <loadproperties srcfile="${basedir}/.env" />
+    </then>
+  </if>
 <!--
 ===================================================================
   Functional Helpers.
@@ -116,16 +116,6 @@
     </sequential>
   </macrodef>
 
-  <macrodef name="executeAntTask">
-    <attribute name="target" /> 
-
-    <sequential>
-      <ant dir="${platformhome}" target="@{target}">
-        <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}"/>
-      </ant>
-    </sequential>
-  </macrodef>
-
 <!--
 ===================================================================
   Hybris OOTB Targets MOD.
@@ -141,13 +131,10 @@
 <!--===================================================================
   Hybris Scaffoldings.
 ====================================================================-->
-  <target name="-env" if="dotenv.exists" description="try load project's .env properties">
-    <loadproperties srcfile="${basedir}/.env"/>
-    <!-- safeguard to ensure we have Hybris `bin` package appointed in System.env -->
-    <fail unless="HYB_BIN_DIR" message="Hybris `bin` package is missing" />
-  </target>
+  <!-- safeguard to ensure we have Hybris `bin` package appointed in System.env -->
+  <fail unless="HYB_BIN_DIR" message="Hybris `bin` package is missing" />
 
-  <target name="source" unless="platform.exists" depends="-env">
+  <target name="source" unless="platform.exists">
     <copy todir="${dir.bin}/">
       <fileset dir="${HYB_BIN_DIR}/"/>
     </copy>
@@ -158,8 +145,7 @@
     <createSettingsProfile profile="testing" template="production" />
   </target>
 
-  <target name="bootstrap" depends="source,createSettingsProfiles">
-  </target>
+  <target name="bootstrap" depends="source,createSettingsProfiles" />
 
   <target name="purge" description="clean up everything (except source.) back to stage 0">
     <echo message="======================================================================"/>
@@ -187,6 +173,7 @@
   Hybris OOTB Targets MOD.
 ===================================================================
 -->
+  <!-- TODO supports direct `-debug` flag? -->
   <target name="startHybrisServer" depends="-CONFIG">
   <!-- accept CLI argument to determine whether to run server in daemon mode. -->
     <if>
