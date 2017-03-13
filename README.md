@@ -12,6 +12,11 @@
     * defined in System environment variables.
     * defined in `.env` (ignored by `.gitignore`).
 
+### Features
+
+  - all Hybris OOTB [ant](http://ant.apache.org/) tasks.
+  - handy/improved version of server related tasks. 
+
 ### Getting Started
 
   ```bash
@@ -24,7 +29,7 @@
 * `config/develop` - settings profile for development (default), generated via Hybris `develop` template.
 * `config/testing` - settings profile for online testing, generated via Hybris `production` template.
 
-**NOTE** you generate new settings profile using following command:
+**NOTE** you generate new/individual settings profile using following command:
 
   ```bash
   ant createConfig -DHYBRIS_CONFIG_DIR=`pwd`/config/<profile> -Dinput.template=<develop or production>
@@ -55,6 +60,6 @@
 - [x] Hybris OOTB ant tasks integrations.
 - [x] Multi settings profiles supports.
 - [x] daemon server supports.
-- [ ] create new settings profile.
+- [x] create new settings profile.
 - [ ] checkstyle integration (pre-build).
 - [ ] running server detections.
