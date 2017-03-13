@@ -68,8 +68,14 @@
     <available file="${basedir}/.env" type="file" />
     <then>
       <loadproperties srcfile="${basedir}/.env" />
+      <propertyselector property="addons"
+          delimiter=","
+          casesensitive="false"
+          match="([^\.]*)\.addonnames"
+          select="\1" />
     </then>
   </if>
+
 <!--
 ===================================================================
   Functional Helpers.
@@ -173,6 +179,48 @@
   Hybris OOTB Targets MOD.
 ===================================================================
 -->
+  <!-- addon (un)install supports via dotenv. 
+    pattern `storefront`.addonnames=<addon-a>,<addon-b>,<addon-c> 
+    defined `.env` will be automatically (un)install.
+  -->
+  <target name="addoninstall">
+    <if>
+      <isset property="addons" />
+      <then>
+        <for list="${addons}" param="storefront">
+          <sequential>
+            <ant dir="${platformhome}" target="addoninstall">
+              <property name="addonnames" value="${@{storefront}.addonnames}" />
+              <property name="addonStorefront.yacceleratorstorefront" value="@{storefront}" />
+            </ant>
+          </sequential>
+        </for>
+      </then>
+      <else>
+        <ant dir="${platformhome}" target="addoninstall" />
+      </else>
+    </if>
+  </target>
+
+  <target name="addonuninstall">
+    <if>
+      <isset property="addons" />
+      <then>
+        <for list="${addons}" param="storefront">
+          <sequential>
+            <ant dir="${platformhome}" target="addonuninstall">
+              <property name="addonnames" value="${@{storefront}.addonnames}" />
+              <property name="addonStorefront.yacceleratorstorefront" value="@{storefront}" />
+            </ant>
+          </sequential>
+        </for>
+      </then>
+      <else>
+        <ant dir="${platformhome}" target="addonuninstall" />
+      </else>
+    </if>
+  </target>
+
   <!-- TODO supports direct `-debug` flag? -->
   <target name="startHybrisServer" depends="-CONFIG">
   <!-- accept CLI argument to determine whether to run server in daemon mode. -->
@@ -204,9 +252,6 @@
     <execute cmd="${cmd.hybris}" dir="${platformhome}">
       <arg value="stop" />
     </execute>
-  </target>
-
-  <target name="play">
   </target>
 
 </project>

@@ -6,7 +6,7 @@
 
   - Java SDK Version >= v8
   - `ANT_HOME` defined in System environment variables (version >= 1.9.0).
-  - `ANT_OPTS` defined in System environment variables (OPTIONAL), e.g. `-Xmx512m -Dfile.encoding=UTF-8`.
+  - `ANT_OPTS` defined in System environment variables (OPTIONAL), e.g. `-Xmx1024m -Dfile.encoding=UTF-8`.
   - `HYB_BIN_DIR` defined and appointed to your local Hybris `bin` package by the following orders:
     * passed in by CLI.
     * defined in System environment variables.
@@ -16,6 +16,11 @@
 
   - all Hybris OOTB [ant](http://ant.apache.org/) tasks.
   - handy/improved version of server related tasks. 
+  - `.env` based `addoninstall` and `addonuninstall` supports, pattern:
+
+    ```bash 
+    <storefront>.addonnames = <addon-a>,<addon-b>,<addon-c>
+    ```
 
 ### Getting Started
 
@@ -61,5 +66,6 @@
 - [x] Multi settings profiles supports.
 - [x] daemon server supports.
 - [x] create new settings profile.
+- [x] `addoninstall`/`addonuninstall` supports mechanism.
 - [ ] checkstyle integration (pre-build).
 - [ ] running server detections.
