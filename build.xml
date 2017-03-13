@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="hybris" basedir="." default="build" 
+    xmlns:if="ant:if" xmlns:unless="ant:unless">
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- fixed and required by Hybris OOTB ant build.xml -->
+  <property name="platformhome" location="${basedir}/bin/platform"/>
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--
+ ===================================================================
+  Requirements
+    - `JAVA_HOME` - version greater than v8.
+    - `ANT_HOME`  - version greater than v1.9.
+    - `ANT_OPTS`  - `ANT_OPTS=-Xmx1024m -Dfile.encoding=UTF-8`
+
+  Prerequisites Settings and Properties.
+  `HYB_BIN_DIR`       - CLI argument > .env > System.env.
+  `HYBRIS_CONFIG_DIR` - CLI argument > System.env > default (config/develop).
+====================================================================
+-->
+  <property environment="env"/>
+  <!-- common commands -->
+  <condition property="cmd.hybris" value="hybrisserver.bat" else="hybrisserver.sh">
+    <os family="windows" />
+  </condition>
+
+  <!-- common directories -->
+  <property name="dir.bin"    value="${basedir}/bin" />
+  <property name="dir.config" value="${basedir}/config" />
+  <property name="dir.tmp"    value="${java.io.tmpdir}"/>
+
+  <!-- Hybris package source directory - CLI > System.env. -->
+  <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_SRC"/>
+
+  <!-- Native Hybris config profiles - CLI > System.env > default. -->
+  <condition property="HYBRIS_CONFIG_DIR" 
+      value="${env.HYBRIS_CONFIG_DIR}" 
+      else="${dir.config}/develop"
+      unless:set="HYBRIS_CONFIG_DIR">
+    <isset property="env.HYBRIS_CONFIG_DIR"/>
+  </condition>
+
+  <!-- try load Hybris OOTB `ant-contrib`. -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml"
+      classpath="${HYB_BIN_DIR}/platform/lib/ant-contrib-1.0b3.jar" />
+
+<!--
+=====================================================================
+  Project Properties
+=====================================================================
+-->
+  <condition property="platform.exists">
+    <available file="${platformhome}" type="dir" />
+  </condition>
+
+  <condition property="dotenv.exists">
+    <available file="${basedir}/.env" type="file"/>
+  </condition>
+
+  <condition property="config.exists">
+    <available file="${dir.config}" type="dir"/>
+  </condition>
+
+  <!-- import Hybris OOTB `ant` build.xml directly (if exists)
+  also avoid missing config folder issue (auto. config generation).
+  -->
+  <if>
+    <isset property="config.exists" />
+    <then>
+      <import file="${platformhome}/build.xml" optional="true" />
+    </then>
+  </if>
+
+<!--
+===================================================================
+  Functional Helpers.
+===================================================================
+-->
+  <macrodef name="createSettingsProfile">
+    <attribute name="profile" default="develop" />
+    <attribute name="template" default="develop" />
+
+    <sequential>
+      <if>
+        <available file="${dir.config}/@{profile}" type="dir" />
+        <then>
+          <echo level="warning" message="`config/@{profile}` exists, creation ignored."/>
+        </then>
+        <else>
+          <ant dir="${platformhome}" target="createConfig" >
+            <property name="input.template" value="@{template}"/>
+            <property name="HYBRIS_CONFIG_DIR" value="${dir.tmp}/@{profile}"/>
+            <property name="JAVAMEM" value="4G" />
+          </ant>
+          <move file="${dir.tmp}/@{profile}" tofile="${dir.config}/@{profile}"/>
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="execute">
+    <attribute name="cmd" />
+    <attribute name="dir" default="${basedir}" />
+    <element name="args" implicit="yes" />
+
+    <sequential>
+      <!-- available for Windows ONLY -->
+      <exec osfamily="windows" dir="@{dir}" executable="cmd">
+        <arg value="/c" />
+        <arg value="@{cmd}" />
+        <args />
+      </exec>
+      <!-- available for *nix ONLY -->
+      <exec osfamily="unix" dir="@{dir}" executable="@{cmd}">
+        <args />
+      </exec>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="executeAntTask">
+    <attribute name="target" /> 
+
+    <sequential>
+      <ant dir="${platformhome}" target="@{target}">
+        <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}"/>
+      </ant>
+    </sequential>
+  </macrodef>
+
+<!--
+===================================================================
+  Hybris OOTB Targets MOD.
+===================================================================
+-->
+  <target name="-CONFIG">
+    <echo message="----------------------------------------------------------------------"/>
+    <echo message="    `HYBRIS_CONFIG_DIR`  => ${HYBRIS_CONFIG_DIR}"/>
+    <echo message="----------------------------------------------------------------------"/>
+    <sleep seconds="1"/>
+  </target>
+
+<!--===================================================================
+  Hybris Scaffoldings.
+====================================================================-->
+  <target name="-env" if="dotenv.exists" description="try load project's .env properties">
+    <loadproperties srcfile="${basedir}/.env"/>
+    <!-- safeguard to ensure we have Hybris `bin` package appointed in System.env -->
+    <fail unless="HYB_BIN_DIR" message="Hybris `bin` package is missing" />
+  </target>
+
+  <target name="source" unless="platform.exists" depends="-env">
+    <copy todir="${dir.bin}/">
+      <fileset dir="${HYB_BIN_DIR}/"/>
+    </copy>
+  </target>
+
+  <target name="createSettingsProfiles">
+    <createSettingsProfile profile="develop" template="develop" />
+    <createSettingsProfile profile="testing" template="production" />
+  </target>
+
+  <target name="bootstrap" depends="source,createSettingsProfiles">
+  </target>
+
+  <target name="purge" description="clean up everything (except source.) back to stage 0">
+    <echo message="======================================================================"/>
+    <echo message=" Ready to *ERASE* all the data in 5 seconds..."/>
+    <echo message="======================================================================"/>
+    <echo message=" ██╗    ██╗ █████╗ ██████╗ ███╗   ██╗██╗███╗   ██╗ ██████╗ "/>
+    <echo message=" ██║    ██║██╔══██╗██╔══██╗████╗  ██║██║████╗  ██║██╔════╝ "/>
+    <echo message=" ██║ █╗ ██║███████║██████╔╝██╔██╗ ██║██║██╔██╗ ██║██║  ███╗ "/>
+    <echo message=" ██║███╗██║██╔══██║██╔══██╗██║╚██╗██║██║██║╚██╗██║██║   ██║ "/>
+    <echo message=" ╚███╔███╔╝██║  ██║██║  ██║██║ ╚████║██║██║ ╚████║╚██████╔╝ "/>
+    <echo message="  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝  "/>
+    <echo message="======================================================================"/>
+    <sleep seconds="5"/>
+    <echo message=" Start purging the whole Hybris instance..."/>
+    <echo message="======================================================================"/>
+    <delete dir="${basedir}/data" />
+    <delete dir="${basedir}/log" />
+    <delete dir="${basedir}/roles" />
+    <delete dir="${basedir}/temp" />
+    <delete file="${basedir}/velocity.log"/>
+  </target>
+
+<!--
+===================================================================
+  Hybris OOTB Targets MOD.
+===================================================================
+-->
+  <target name="startHybrisServer" depends="-CONFIG">
+  <!-- accept CLI argument to determine whether to run server in daemon mode. -->
+    <if>
+      <and>
+        <isset property="mode"/>
+        <equals arg1="${mode}" arg2="start"/>
+      </and>
+      <then>
+        <echo message="----------------------------------------------------------------------"/>
+        <echo message="  Starting Tomcat as daemon service ..."/>
+        <echo message="----------------------------------------------------------------------"/>
+        <execute cmd="${cmd.hybris}" dir="${platformhome}">
+          <arg value="start" />
+          <arg value="-DHYBRIS_CONFIG_DIR=${HYBRIS_CONFIG_DIR}" />
+        </execute>
+      </then>
+      <else>
+        <execute cmd="${cmd.hybris}" dir="${platformhome}">
+          <arg value="run" />
+          <arg value="debug" />
+          <arg value="-DHYBRIS_CONFIG_DIR=${HYBRIS_CONFIG_DIR}" />
+        </execute>
+      </else>
+    </if>
+  </target>
+
+  <target name="stopHybrisServer">
+    <execute cmd="${cmd.hybris}" dir="${platformhome}">
+      <arg value="stop" />
+    </execute>
+  </target>
+
+  <target name="play">
+  </target>
+
+</project>

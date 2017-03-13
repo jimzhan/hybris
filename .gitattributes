@@ -1,0 +1,6 @@
+* text eol=lf
+*.png -text
+*.exe -text
+*.jpg -text
+*.txt -text
+*.jar -binary

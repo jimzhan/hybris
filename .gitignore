@@ -1,0 +1,92 @@
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+##################
+# Custom Ignores #
+##################
+
+
+########################
+# Java generated files #
+########################
+*.class
+*.ear
+*.jar
+*.war
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+##########
+# Hybris #
+##########
+bin/*
+!bin/custom/
+gensrc/
+build.xml
+velocity.log
+hmc.xsd
+beans.xsd
+items.xsd
+extensioninfo.xsd
+project.properties
+platformhome.properties
+*-testclasses.xml
+classes/
+testreport/
+
+###############
+# Hybris Data #
+###############
+config
+data
+log
+lib
+roles
+temp
+
+#########################
+# Maven generated files #
+#########################
+target/
+
+######################
+# OS generated files #
+######################
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+#################
+# Editors Files #
+#################
+.vscode
+*.sublime-project
+*.sublime-workspace
+.idea
+eclipsebin
+.project
+.settings
+
+##############
+# Diff Files #
+##############
+*.orig
+
+######################
+# Editing temp files #
+######################
+*~
+*#
+
+###########################
+# Other unnecessary files #
+###########################
+.svn
+.env
+build
+.sonar
+
+##############
+# Exceptions #
+##############
+# !xxx.jar
