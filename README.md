@@ -42,6 +42,8 @@
 
 ### OOTB MOD
 
+- `addoninstall` - provides `.env` based supports via specific pattern (`<storefront>.addonnames=<addon-a>,<addon-b>`)
+- `addonuninstall` - provides `.env` based supports via specific pattern (`<storefront>.addonnames=<addon-a>,<addon-b>`)
 - `startHybrisServer` - starts Hybris server at the foreground (default) or background (via `-Dmode=start`, synonym to tomcat arguments).
 - `stopHybrisServer` - stops Hybris server at the background (if any).
 
