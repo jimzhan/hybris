@@ -58,11 +58,6 @@
     <available file="${platformhome}" type="dir" />
   </condition>
 
-  <!-- Addon extensions definition pattern: 
-        <template>.<storefront>.addonnames=<comma-separated-addons>
-  -->
-  <property name="regex.addons" value="(y\w+storefront)\.([^\.]*)\.addonnames" />
-
   <!-- import Hybris OOTB `ant` build.xml directly (if exists)
   also avoid missing config folder issue (auto. config generation).
   -->
@@ -86,6 +81,10 @@
   Functional Helpers.
 ===================================================================
 -->
+  <!-- Addon extensions definition pattern: 
+        <template>.<storefront>.addonnames=<comma-separated-addons>
+  -->
+  <property name="regex.addons" value="(y\w+storefront)\.([^\.]*)\.addonnames" />
   <propertyselector property="addons"
       delimiter=","
       distinct="true"
