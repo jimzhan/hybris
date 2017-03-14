@@ -75,5 +75,5 @@
 - [x] daemon server supports.
 - [x] create new settings profile.
 - [x] `addoninstall`/`addonuninstall` supports mechanism.
+- [x] running server detections.
 - [ ] checkstyle integration (pre-build).
-- [ ] running server detections.

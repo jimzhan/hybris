@@ -4,23 +4,20 @@
   <!-- fixed and required by Hybris OOTB ant build.xml -->
   <property name="platformhome" location="${basedir}/bin/platform"/>
 <!--
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  Requirements
-    - `JAVA_HOME` - version greater than v8.
-    - `ANT_HOME`  - version greater than v1.9.
-    - `ANT_OPTS`  - `ANT_OPTS=-Xmx1024m -Dfile.encoding=UTF-8`
-
-  Prerequisites Settings and Properties.
-  `HYB_BIN_DIR`       - CLI > .env > System.env.
-  `HYBRIS_CONFIG_DIR` - CLI > System.env > default (config/develop).
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
--->
-
-<!--
-=====================================================================
-  System Environment Settings. 
-=====================================================================
--->
+  ##########################################################################
+  #  System Environment Settings Required.
+  # ........................................................................
+  #  - `JAVA_HOME` - version greater than v8.
+  #  - `ANT_HOME`  - version greater than v1.9.
+  #  - `ANT_OPTS`  - `ANT_OPTS=-Xmx1024m -Dfile.encoding=UTF-8`
+  # ........................................................................
+  #  Prerequisites Settings and Properties.
+  # ........................................................................
+  # `HYB_BIN_DIR`       - CLI > .env > System.env.
+  # `HYBRIS_CONFIG_DIR` - CLI > System.env > default (config/develop).
+  ##########################################################################
+  #  System Environment Settings. 
+  ##########################################################################-->
   <!-- READONLY System environment variables -->
   <property environment="env"/>
   <!-- common commands -->
@@ -50,17 +47,15 @@
       classpath="${HYB_BIN_DIR}/platform/lib/ant-contrib-1.0b3.jar" />
 
 <!--
-=====================================================================
-  Project Settings. 
-=====================================================================
--->
+  ##########################################################################
+  #  Project Settings. 
+  ##########################################################################-->
   <condition property="platform.exists">
     <available file="${platformhome}" type="dir" />
   </condition>
 
   <!-- import Hybris OOTB `ant` build.xml directly (if exists)
-  also avoid missing config folder issue (auto. config generation).
-  -->
+  also avoid missing config folder issue (auto. config generation).-->
   <if>
     <available file="${dir.config}" type="dir"/>
     <then>
@@ -69,18 +64,15 @@
   </if>
 
   <!-- dotenv supports -->
-  <if>
+  <condition property="dotenv.exists">
     <available file="${basedir}/.env" type="file" />
-    <then>
-      <loadproperties srcfile="${basedir}/.env" />
-    </then>
-  </if>
+  </condition>
+  <loadproperties srcfile="${basedir}/.env" if:set="dotenv.exists" />
 
 <!--
-===================================================================
-  Functional Helpers.
-===================================================================
--->
+  ##########################################################################
+  #  Functional Helpers. 
+  ##########################################################################-->
   <!-- Addon extensions definition pattern: 
         <template>.<storefront>.addonnames=<comma-separated-addons>
   -->
@@ -92,8 +84,7 @@
       match="${regex.addons}"
       select="\0" />
   <!-- By following pattern (<template>.<storefront>.addonnames=<addons,...> 
-    Automatically (un)install all pre-defined addon extensions (if any). 
-  -->
+    Automatically (un)install all pre-defined addon extensions (if any). -->
   <macrodef name="addons">
     <attribute name="action" />
     <sequential>
@@ -170,15 +161,24 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="loadConfiguredValues">
+    <sequential>
+      <loadproperties srcfile="${HYBRIS_CONFIG_DIR}/local.properties" />
+      <loadproperties srcfile="${platformhome}/project.properties" />
+      <!-- default Solr Server settings defined in `ext-commerce/solrserver`. -->
+      <property name="solrserver.instances.default.hostname" value="localhost" />
+      <property name="solrserver.instances.default.port" value="8983" />
+    </sequential>
+  </macrodef>
+
 <!--
-===================================================================
-  Hybris Scaffoldings.
-===================================================================
--->
+  ##########################################################################
+  #  Hybris Scaffoldings. 
+  ##########################################################################-->
   <target name="-CONFIG">
-    <echo message="----------------------------------------------------------------------"/>
-    <echo message="    `HYBRIS_CONFIG_DIR`  => ${HYBRIS_CONFIG_DIR}"/>
-    <echo message="----------------------------------------------------------------------"/>
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="  `HYBRIS_CONFIG_DIR`  => ${HYBRIS_CONFIG_DIR}" />
+    <echo message="----------------------------------------------------------------------" />
     <sleep seconds="1"/>
   </target>
 
@@ -217,10 +217,9 @@
   </target>
 
 <!--
-===================================================================
-  Hybris OOTB Targets MOD.
-===================================================================
--->
+  ##########################################################################
+  #  Hybris OOTB Targets MOD. 
+  ##########################################################################-->
   <!-- Automatic addon extensions (un)install supports via properties definitions. -->
   <target name="addoninstall">
     <addons action="addoninstall" />
@@ -258,14 +257,55 @@
   </target>
 
   <target name="stopHybrisServer">
-    <execute cmd="${cmd.hybris}" dir="${platformhome}">
-      <arg value="stop" />
-    </execute>
+    <loadConfiguredValues />
+    <condition property="tomcat.running">
+      <socket server="127.0.0.1" port="${tomcat.http.port}" /> 
+    </condition>
+
+    <if>
+      <isset property="tomcat.running" />
+      <then>
+        <echo message="----------------------------------------------------------------------" />
+        <echo message="  Stopping Hybris Server. [port: ${tomcat.http.port}] " />
+        <echo message="----------------------------------------------------------------------" />
+        <execute cmd="${cmd.hybris}" dir="${platformhome}">
+          <arg value="stop" />
+        </execute>
+      </then>
+      <else>
+        <echo level="warning" message="----------------------------------------------------------------------" />
+        <echo level="warning" message="  Hybris Server is not running. [port: ${tomcat.http.port}] " />
+        <echo level="warning" message="----------------------------------------------------------------------" />
+      </else>
+    </if>
+  </target>
+
+  <target name="stopSolrServer">
+    <loadConfiguredValues />
+    <condition property="solrserver.running">
+      <socket server="${solrserver.instances.default.hostname}" 
+              port="${solrserver.instances.default.port}" /> 
+    </condition>
+
+    <if>
+      <isset property="solrserver.running" />
+      <then>
+        <echo message="----------------------------------------------------------------------" />
+        <echo message="  Stopping Solr Server. [port: ${solrserver.instances.default.port}] " />
+        <echo message="----------------------------------------------------------------------" />
+        <ant dir="${platformhome}" target="stopSolrServer" />
+      </then>
+      <else>
+        <echo level="warning" message="----------------------------------------------------------------------" />
+        <echo level="warning" message="  Solr Server is not running. [port: ${solrserver.instances.default.port}] " />
+        <echo level="warning" message="----------------------------------------------------------------------" />
+      </else>
+    </if>
   </target>
 
   <target name="restartHybrisServer" depends="stopHybrisServer">
     <antcall target="startHybrisServer">
-      <param name="mode" value="start"/>
+      <param name="mode" value="start" />
     </antcall>
   </target>
 
