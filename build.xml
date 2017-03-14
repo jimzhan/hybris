@@ -78,12 +78,6 @@
     <available file="${basedir}/.env" type="file" />
     <then>
       <loadproperties srcfile="${basedir}/.env" />
-      <propertyselector property="addons"
-          delimiter=","
-          distinct="true"
-          casesensitive="false"
-          match="${regex.addons}"
-          select="\0" />
     </then>
   </if>
 
@@ -97,7 +91,12 @@
   -->
   <macrodef name="addons">
     <attribute name="action" />
-
+    <propertyselector property="addons"
+        delimiter=","
+        distinct="true"
+        casesensitive="false"
+        match="${regex.addons}"
+        select="\0" />
     <sequential>
       <if>
         <isset property="addons" />
