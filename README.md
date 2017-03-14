@@ -16,6 +16,10 @@
 
   - all Hybris OOTB [ant](http://ant.apache.org/) tasks.
   - handy/improved version of server related tasks. 
+  - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
+    * passed in by CLI.
+    * defined in System environment variables.
+    * default settings profile - `config/develop`.
   - `.env` based `addoninstall` and `addonuninstall` supports, pattern:
 
     ```bash 
