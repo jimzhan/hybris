@@ -1,6 +1,6 @@
 # Hybris Development Boilerplate
 
-## An [ant](http://ant.apache.org/) based Hybris development boiloerplate with automations.
+## An [ant](http://ant.apache.org/) based Hybris development boilerplate with automations.
 
 ### Prequiresites
 
@@ -19,7 +19,7 @@
   - `.env` based `addoninstall` and `addonuninstall` supports, pattern:
 
     ```bash 
-    <storefront>.addonnames = <addon-a>,<addon-b>,<addon-c>
+    <template>.<storefront>.addonnames = <addon-a>,<addon-b>,<addon-c>
     ```
 
 ### Getting Started
@@ -42,8 +42,8 @@
 
 ### OOTB MOD
 
-- `addoninstall` - provides `.env` based supports via specific pattern (`<storefront>.addonnames=<addon-a>,<addon-b>`)
-- `addonuninstall` - provides `.env` based supports via specific pattern (`<storefront>.addonnames=<addon-a>,<addon-b>`)
+- `addoninstall` - provides `.env` based supports via specific pattern (`<template>.<storefront>.addonnames=<addon-a>,<addon-b>`)
+- `addonuninstall` - provides `.env` based supports via specific pattern (`<template>.<storefront>.addonnames=<addon-a>,<addon-b>`)
 - `startHybrisServer` - starts Hybris server at the foreground (default) or background (via `-Dmode=start`, synonym to tomcat arguments).
 - `stopHybrisServer` - stops Hybris server at the background (if any).
 
