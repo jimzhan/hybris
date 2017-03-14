@@ -13,8 +13,8 @@
     - `ANT_OPTS`  - `ANT_OPTS=-Xmx1024m -Dfile.encoding=UTF-8`
 
   Prerequisites Settings and Properties.
-  `HYB_BIN_DIR`       - CLI argument > .env > System.env.
-  `HYBRIS_CONFIG_DIR` - CLI argument > System.env > default (config/develop).
+  `HYB_BIN_DIR`       - CLI > .env > System.env.
+  `HYBRIS_CONFIG_DIR` - CLI > System.env > default (config/develop).
 ====================================================================
 -->
   <!-- READONLY System environment variables -->
@@ -39,6 +39,7 @@
 
   <!-- Hybris package source directory - CLI > System.env. -->
   <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_SRC"/>
+  <fail unless="HYB_BIN_DIR" message="`HYB_BIN_DIR` undefined." />
 
   <!-- try load Hybris OOTB `ant-contrib`. -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml"
@@ -92,12 +93,14 @@
           <echo level="warning" message="`config/@{profile}` exists, creation ignored."/>
         </then>
         <else>
+          <!-- delete existing settings profile from tmp folder, if any. -->
+          <delete dir="${dir.tmp}/@{profile}" quiet="true"/>
           <ant dir="${platformhome}" target="createConfig" >
-            <property name="input.template" value="@{template}"/>
-            <property name="HYBRIS_CONFIG_DIR" value="${dir.tmp}/@{profile}"/>
+            <property name="input.template" value="@{template}" />
+            <property name="HYBRIS_CONFIG_DIR" value="${dir.tmp}/@{profile}" />
             <property name="JAVAMEM" value="4G" />
           </ant>
-          <move file="${dir.tmp}/@{profile}" tofile="${dir.config}/@{profile}"/>
+          <move file="${dir.tmp}/@{profile}" tofile="${dir.config}/@{profile}" />
         </else>
       </if>
     </sequential>
@@ -137,9 +140,6 @@
 <!--===================================================================
   Hybris Scaffoldings.
 ====================================================================-->
-  <!-- safeguard to ensure we have Hybris `bin` package appointed in System.env -->
-  <fail unless="HYB_BIN_DIR" message="Hybris `bin` package is missing" />
-
   <target name="source" unless="platform.exists">
     <copy todir="${dir.bin}/">
       <fileset dir="${HYB_BIN_DIR}/"/>
