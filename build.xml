@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="hybris" basedir="." default="build" 
     xmlns:if="ant:if" xmlns:unless="ant:unless">
-<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
   <!-- fixed and required by Hybris OOTB ant build.xml -->
   <property name="platformhome" location="${basedir}/bin/platform"/>
-<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 <!--
- ===================================================================
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Requirements
     - `JAVA_HOME` - version greater than v8.
     - `ANT_HOME`  - version greater than v1.9.
@@ -15,7 +13,13 @@
   Prerequisites Settings and Properties.
   `HYB_BIN_DIR`       - CLI > .env > System.env.
   `HYBRIS_CONFIG_DIR` - CLI > System.env > default (config/develop).
-====================================================================
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-->
+
+<!--
+=====================================================================
+  System Environment Settings. 
+=====================================================================
 -->
   <!-- READONLY System environment variables -->
   <property environment="env"/>
@@ -54,6 +58,11 @@
     <available file="${platformhome}" type="dir" />
   </condition>
 
+  <!-- Addon extensions definition pattern: 
+        <template>.<storefront>.addonnames=<comma-separated-addons>
+  -->
+  <property name="regex.addons" value="(y\w+storefront)\.([^\.]*)\.addonnames" />
+
   <!-- import Hybris OOTB `ant` build.xml directly (if exists)
   also avoid missing config folder issue (auto. config generation).
   -->
@@ -71,9 +80,10 @@
       <loadproperties srcfile="${basedir}/.env" />
       <propertyselector property="addons"
           delimiter=","
+          distinct="true"
           casesensitive="false"
-          match="([^\.]*)\.addonnames"
-          select="\1" />
+          match="${regex.addons}"
+          select="\0" />
     </then>
   </if>
 
@@ -82,6 +92,43 @@
   Functional Helpers.
 ===================================================================
 -->
+  <!-- By following pattern (<template>.<storefront>.addonnames=<addons,...> 
+    Automatically (un)install all pre-defined addon extensions (if any). 
+  -->
+  <macrodef name="addons">
+    <attribute name="action" />
+
+    <sequential>
+      <if>
+        <isset property="addons" />
+        <then>
+          <for list="${addons}" param="config">
+            <sequential>
+              <propertyregex override="yes"
+                  property="template"  
+                  input="@{config}"
+                  regexp="${regex.addons}"
+                  select="\1" />
+              <propertyregex override="yes"
+                  property="storefront"  
+                  input="@{config}"
+                  regexp="${regex.addons}"
+                  select="\2"/>
+              <ant dir="${platformhome}" target="@{action}">
+                <property name="addonnames" value="${@{config}}" />
+                <property name="addonStorefront.${template}" value="${storefront}" />
+              </ant>
+            </sequential>
+          </for>
+        </then>
+        <else>
+          <!-- regular OOTB addon actions -->
+          <ant dir="${platformhome}" target="@{action}" />
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+
   <macrodef name="createSettingsProfile">
     <attribute name="profile" default="develop" />
     <attribute name="template" default="develop" />
@@ -93,7 +140,7 @@
           <echo level="warning" message="`config/@{profile}` exists, creation ignored."/>
         </then>
         <else>
-          <!-- delete existing settings profile from tmp folder, if any. -->
+          <!-- delete existing settings profile from tmp folder (if any). -->
           <delete dir="${dir.tmp}/@{profile}" quiet="true"/>
           <ant dir="${platformhome}" target="createConfig" >
             <property name="input.template" value="@{template}" />
@@ -127,7 +174,7 @@
 
 <!--
 ===================================================================
-  Hybris OOTB Targets MOD.
+  Hybris Scaffoldings.
 ===================================================================
 -->
   <target name="-CONFIG">
@@ -137,9 +184,6 @@
     <sleep seconds="1"/>
   </target>
 
-<!--===================================================================
-  Hybris Scaffoldings.
-====================================================================-->
   <target name="source" unless="platform.exists">
     <copy todir="${dir.bin}/">
       <fileset dir="${HYB_BIN_DIR}/"/>
@@ -179,46 +223,13 @@
   Hybris OOTB Targets MOD.
 ===================================================================
 -->
-  <!-- addon (un)install supports via dotenv. 
-    pattern `storefront`.addonnames=<addon-a>,<addon-b>,<addon-c> 
-    defined `.env` will be automatically (un)install.
-  -->
+  <!-- Automatic addon extensions (un)install supports via properties definitions. -->
   <target name="addoninstall">
-    <if>
-      <isset property="addons" />
-      <then>
-        <for list="${addons}" param="storefront">
-          <sequential>
-            <ant dir="${platformhome}" target="addoninstall">
-              <property name="addonnames" value="${@{storefront}.addonnames}" />
-              <property name="addonStorefront.yacceleratorstorefront" value="@{storefront}" />
-            </ant>
-          </sequential>
-        </for>
-      </then>
-      <else>
-        <ant dir="${platformhome}" target="addoninstall" />
-      </else>
-    </if>
+    <addons action="addoninstall" />
   </target>
 
   <target name="addonuninstall">
-    <if>
-      <isset property="addons" />
-      <then>
-        <for list="${addons}" param="storefront">
-          <sequential>
-            <ant dir="${platformhome}" target="addonuninstall">
-              <property name="addonnames" value="${@{storefront}.addonnames}" />
-              <property name="addonStorefront.yacceleratorstorefront" value="@{storefront}" />
-            </ant>
-          </sequential>
-        </for>
-      </then>
-      <else>
-        <ant dir="${platformhome}" target="addonuninstall" />
-      </else>
-    </if>
+    <addons action="addonuninstall" />
   </target>
 
   <!-- TODO supports direct `-debug` flag? -->
