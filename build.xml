@@ -86,17 +86,17 @@
   Functional Helpers.
 ===================================================================
 -->
+  <propertyselector property="addons"
+      delimiter=","
+      distinct="true"
+      casesensitive="false"
+      match="${regex.addons}"
+      select="\0" />
   <!-- By following pattern (<template>.<storefront>.addonnames=<addons,...> 
     Automatically (un)install all pre-defined addon extensions (if any). 
   -->
   <macrodef name="addons">
     <attribute name="action" />
-    <propertyselector property="addons"
-        delimiter=","
-        distinct="true"
-        casesensitive="false"
-        match="${regex.addons}"
-        select="\0" />
     <sequential>
       <if>
         <isset property="addons" />
