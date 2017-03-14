@@ -24,7 +24,7 @@
   <!-- READONLY System environment variables -->
   <property environment="env"/>
   <!-- common commands -->
-  <condition property="cmd.hybris" value="hybrisserver.bat" else="hybrisserver.sh">
+  <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
     <os family="windows" />
   </condition>
 
@@ -262,5 +262,13 @@
       <arg value="stop" />
     </execute>
   </target>
+
+  <target name="restartHybrisServer" depends="stopHybrisServer">
+    <antcall target="startHybrisServer">
+      <param name="mode" value="start"/>
+    </antcall>
+  </target>
+
+  <target name="restartSolrServer" depends="stopSolrServer,startSolrServer" />
 
 </project>

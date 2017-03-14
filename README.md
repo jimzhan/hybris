@@ -44,6 +44,8 @@
 
 - `addoninstall` - provides `.env` based supports via specific pattern (`<template>.<storefront>.addonnames=<addon-a>,<addon-b>`)
 - `addonuninstall` - provides `.env` based supports via specific pattern (`<template>.<storefront>.addonnames=<addon-a>,<addon-b>`)
+- `restartHybrisServer` - provides shortcut for stop-n-start current Hybris server.
+- `restartSolrServer` - provides shortcut for stop-n-start current Solr server.
 - `startHybrisServer` - starts Hybris server at the foreground (default) or background (via `-Dmode=start`, synonym to tomcat arguments).
 - `stopHybrisServer` - stops Hybris server at the background (if any).
 
