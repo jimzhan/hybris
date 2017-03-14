@@ -269,6 +269,9 @@
     </antcall>
   </target>
 
-  <target name="restartSolrServer" depends="stopSolrServer,startSolrServer" />
+  <target name="restartSolrServer">
+    <antcall target="stopSolrServer" />
+    <antcall target="startSolrServer" />
+  </target>
 
 </project>
