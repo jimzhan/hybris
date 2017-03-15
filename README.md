@@ -76,4 +76,5 @@
 - [x] create new settings profile.
 - [x] `addoninstall`/`addonuninstall` supports mechanism.
 - [x] running server detections.
+- [x] Ivy package manager integration.
 - [ ] checkstyle integration (pre-build).
