@@ -142,6 +142,29 @@
     </sequential>
   </macrodef>
 
+ <macrodef name="download">
+    <attribute name="url" />
+    <attribute name="dest" />
+
+    <sequential>
+      <local name="destdir" />
+      <dirname property="destdir" file="@{dest}" />
+      <get dest="${destdir}" usetimestamp="true">
+        <url url="@{url}" />
+        <url url="@{url}.sha1" />
+      </get>
+
+      <local name="checksum.matches" />
+      <local name="checksum.matches.failed" />
+      <checksum file="@{dest}" algorithm="sha" fileext=".sha1"
+                verifyproperty="checksum.matches" />
+      <condition property="checksum.matches.failed">
+        <equals arg1="${checksum.matches}" arg2="false" />
+      </condition>
+      <fail if="checksum.matches.failed">File @{dest} corrupted</fail>
+    </sequential>
+  </macrodef>
+
   <macrodef name="execute">
     <attribute name="cmd" />
     <attribute name="dir" default="${basedir}" />
