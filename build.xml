@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="hybris" basedir="." default="build" 
+    xmlns:ivy="antlib:org.apache.ivy.ant"
     xmlns:if="ant:if" xmlns:unless="ant:unless">
   <!-- fixed and required by Hybris OOTB ant build.xml -->
   <property name="platformhome" location="${basedir}/bin/platform"/>
@@ -184,6 +185,43 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="initIvy">
+    <sequential>
+      <property name="ivy.home" value="${user.home}/.ant" />
+      <property name="ivy.dep.file" value="${dir.tmp}/ivy.xml" />
+      <!-- Ensure we have Ivy downloaded into Ant lib -->
+      <download dest="${env.ANT_HOME}/lib/ivy-2.4.0.jar"
+                url="http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar" />
+      <!-- Enable custom Ivy settings. -->
+      <echoxml file="${dir.tmp}/ivysettings.xml">
+        <ivysettings>
+          <settings defaultResolver="chain"/>
+            <resolvers>
+              <chain name="chain">
+                <ibiblio name="central" m2compatible="true"/>
+                <ibiblio name="mvn-repos" m2compatible="true" root="http://repository.pentaho.org/artifactory/repo"/>
+                <filesystem name="local-mvn" m2compatible="true" local="true">
+                  <ivy pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
+                  <artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].[ext]"/>
+                </filesystem>
+              </chain>
+          </resolvers>
+        </ivysettings>
+      </echoxml>
+      <!-- Project dependencies -->
+      <echoxml file="${ivy.dep.file}">
+        <ivy-module version="2.0">
+          <info organisation="github" module="hybris" />
+          <dependencies>
+            <dependency org="com.puppycrawl.tools" name="checkstyle" rev="7.6" />
+          </dependencies>
+        </ivy-module>
+      </echoxml>
+      <!-- Start fetching dependencies -->
+      <ivy:retrieve />
+    </sequential>
+  </macrodef>
+
   <macrodef name="loadConfiguredValues">
     <sequential>
       <condition property="local.properties" value="${HYBRIS_CONFIG_DIR}/local.properties">
@@ -223,7 +261,12 @@
     <createSettingsProfile profile="testing" template="production" />
   </target>
 
-  <target name="bootstrap" depends="source,createSettingsProfiles" />
+  <target name="bootstrap" depends="source,createSettingsProfiles">
+    <echo>----------------------------------------------------------------------</echo>
+    <echo>  Settings up Ivy dependencies manager ... </echo>
+    <echo>----------------------------------------------------------------------</echo>
+    <initIvy />
+  </target>
 
   <target name="purge" description="clean up everything (except source.) back to stage 0">
     <echo message="======================================================================"/>
