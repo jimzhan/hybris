@@ -21,6 +21,7 @@
   ##########################################################################-->
   <!-- READONLY System environment variables -->
   <property environment="env"/>
+
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
     <os family="windows" />
@@ -143,13 +144,14 @@
     </sequential>
   </macrodef>
 
- <macrodef name="download">
+  <macrodef name="download">
     <attribute name="url" />
     <attribute name="dest" />
 
     <sequential>
       <local name="destdir" />
       <dirname property="destdir" file="@{dest}" />
+
       <get dest="${destdir}" usetimestamp="true">
         <url url="@{url}" />
         <url url="@{url}.sha1" />
@@ -185,40 +187,29 @@
     </sequential>
   </macrodef>
 
-  <macrodef name="initIvy">
+  <!-- According to the `ivy.xml` provided, install defined
+      packages accordingly. 
+   -->
+  <macrodef name="ivy-get">
+    <attribute name="xml" default="${basedir}/ivy.xml" />
+
     <sequential>
+      <!-- ensure we have Ivy enabled first -->
+      <setupIvy />
+
+      <local name="ivy.home" />
       <property name="ivy.home" value="${user.home}/.ant" />
-      <property name="ivy.dep.file" value="${dir.tmp}/ivy.xml" />
-      <!-- Ensure we have Ivy downloaded into Ant lib -->
-      <download dest="${env.ANT_HOME}/lib/ivy-2.4.0.jar"
-                url="http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar" />
-      <!-- Enable custom Ivy settings. -->
-      <echoxml file="${dir.tmp}/ivysettings.xml">
-        <ivysettings>
-          <settings defaultResolver="chain"/>
-            <resolvers>
-              <chain name="chain">
-                <ibiblio name="central" m2compatible="true"/>
-                <ibiblio name="mvn-repos" m2compatible="true" root="http://repository.pentaho.org/artifactory/repo"/>
-                <filesystem name="local-mvn" m2compatible="true" local="true">
-                  <ivy pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
-                  <artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].[ext]"/>
-                </filesystem>
-              </chain>
-          </resolvers>
-        </ivysettings>
-      </echoxml>
-      <!-- Project dependencies -->
-      <echoxml file="${ivy.dep.file}">
-        <ivy-module version="2.0">
-          <info organisation="github" module="hybris" />
-          <dependencies>
-            <dependency org="com.puppycrawl.tools" name="checkstyle" rev="7.6" />
-          </dependencies>
-        </ivy-module>
-      </echoxml>
+
+      <local name="ivy.dep.file" />
+      <property name="ivy.dep.file" value="@{xml}" />
+
+      <condition property="ivy.xml">
+        <available file="@{xml}" type="file" />
+      </condition>
+
       <!-- Start fetching dependencies -->
-      <ivy:retrieve />
+      <ivy:retrieve if:set="ivy.xml" />
+
     </sequential>
   </macrodef>
 
@@ -236,6 +227,31 @@
       <!-- default Solr Server settings defined in `ext-commerce/solrserver`. -->
       <property name="solrserver.instances.default.hostname" value="localhost" />
       <property name="solrserver.instances.default.port" value="8983" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="setupIvy">
+    <sequential>
+      <property name="ivy.home" value="${user.home}/.ant" />
+      <!-- Ensure we have Ivy downloaded into Ant lib -->
+      <download dest="${env.ANT_HOME}/lib/ivy-2.4.0.jar"
+                url="http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar" />
+      <!-- Enable custom Ivy settings. -->
+      <echoxml file="${env.ANT_HOME}/lib/ivysettings.xml">
+        <ivysettings>
+          <settings defaultResolver="chain"/>
+            <resolvers>
+              <chain name="chain">
+                <ibiblio name="central" m2compatible="true"/>
+                <ibiblio name="mvn-repos" m2compatible="true" root="http://repository.pentaho.org/artifactory/repo"/>
+                <filesystem name="local-mvn" m2compatible="true" local="true">
+                  <ivy pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
+                  <artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].[ext]"/>
+                </filesystem>
+              </chain>
+          </resolvers>
+        </ivysettings>
+      </echoxml>
     </sequential>
   </macrodef>
 
@@ -265,7 +281,19 @@
     <echo>----------------------------------------------------------------------</echo>
     <echo>  Settings up Ivy dependencies manager ... </echo>
     <echo>----------------------------------------------------------------------</echo>
-    <initIvy />
+    <!-- Project dependencies -->
+    <echoxml file="${dir.tmp}/ivy.xml">
+      <ivy-module version="2.0">
+        <info organisation="github" module="hybris" />
+        <dependencies>
+          <dependency org="com.puppycrawl.tools" name="checkstyle" rev="7.6" />
+        </dependencies>
+      </ivy-module>
+    </echoxml>
+    <!-- Install Project Dependencies. -->
+    <ivy-get xml="${dir.tmp}/ivy.xml" />
+    <!-- Install Custom Dependencies. -->
+    <ivy-get xml="${basedir}/ivy.xml" />
   </target>
 
   <target name="purge" description="clean up everything (except source.) back to stage 0">
