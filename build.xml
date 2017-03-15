@@ -163,8 +163,15 @@
 
   <macrodef name="loadConfiguredValues">
     <sequential>
-      <loadproperties srcfile="${HYBRIS_CONFIG_DIR}/local.properties" />
-      <loadproperties srcfile="${platformhome}/project.properties" />
+      <condition property="local.properties" value="${HYBRIS_CONFIG_DIR}/local.properties">
+        <available file="${HYBRIS_CONFIG_DIR}/local.properties" type="file" />
+      </condition>
+      <condition property="platform.properties" value="${platformhome}/project.properties">
+        <available file="${platformhome}/project.properties" type="file" />
+      </condition>
+
+      <loadproperties srcfile="${local.properties}" if:set="local.properties" />
+      <loadproperties srcfile="${platform.properties}" if:set="platform.properties" />
       <!-- default Solr Server settings defined in `ext-commerce/solrserver`. -->
       <property name="solrserver.instances.default.hostname" value="localhost" />
       <property name="solrserver.instances.default.port" value="8983" />
