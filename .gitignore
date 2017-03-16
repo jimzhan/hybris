@@ -29,6 +29,7 @@ items.xsd
 extensioninfo.xsd
 platformhome.properties
 *-testclasses.xml
+ruleset.xml
 classes/
 testreport/
 
