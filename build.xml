@@ -184,6 +184,7 @@
           <exclude name="**/jalo/**" />
           <exclude name="**/gensrc/**" />
           <exclude name="**/Generated**" />
+          <exclude name="**/build.xml" />
           <exclude name="**/ruleset.xml" />
         </fileset>
       </lint:checkstyle>
