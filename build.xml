@@ -308,13 +308,14 @@
     <local name="check.base.dir" />
     <property name="check.base.dir" value="${basedir}/bin/custom" />
 
+    <mkdir dir="${basedir}/build" />
     <lint:checkstyle config="/${style}"
         failureProperty="checkstyle.failed"
         failOnViolation="true"
         maxErrors="0"
         maxWarnings="0">
       <formatter type="plain" />
-      <formatter type="xml" tofile="${basedir}/checkstyle.xml"/>
+      <formatter type="xml" tofile="${basedir}/build/checkstyle.xml"/>
       <fileset dir="${check.base.dir}">
         <include name="**/*.java" />
         <exclude name="**/*Constants.java" />

@@ -17,6 +17,7 @@
   - all Hybris OOTB [ant](http://ant.apache.org/) tasks.
   - handy/improved version of server related tasks. 
   - custom package definition supports (defined via `ivy.xml`, automatically installed).
+  - build-in static code analysis (pre-`build` and pre-`all`) supports via `checkstyle`.
   - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
     * passed in by CLI.
     * defined in System environment variables.
@@ -78,4 +79,4 @@
 - [x] `addoninstall`/`addonuninstall` supports mechanism.
 - [x] running server detections.
 - [x] Ivy package manager integration.
-- [ ] checkstyle integration (pre-build).
+- [x] checkstyle integration (pre-build).
