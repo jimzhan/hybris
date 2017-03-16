@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="hybris" basedir="." default="build" 
-    xmlns:ivy="antlib:org.apache.ivy.ant"
-    xmlns:if="ant:if" xmlns:unless="ant:unless">
+    xmlns:if="ant:if" xmlns:unless="ant:unless"
+    xmlns:ivy="antlib:org.apache.ivy.ant">
   <!-- fixed and required by Hybris OOTB ant build.xml -->
   <property name="platformhome" location="${basedir}/bin/platform"/>
 <!--
@@ -21,10 +21,6 @@
   ##########################################################################-->
   <!-- READONLY System environment variables -->
   <property environment="env"/>
-
-  <!-- Ivy dependencies manager -->
-  <property name="ivy.home" value="${user.home}/.ant" />
-  <property name="ivy.jar.dir" value="${ivy.home}/lib" />
 
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
@@ -191,29 +187,6 @@
     </sequential>
   </macrodef>
 
-  <!-- According to the `ivy.xml` provided, install defined
-      packages accordingly. 
-   -->
-  <macrodef name="ivy-get">
-    <attribute name="xml" default="${basedir}/ivy.xml" />
-
-    <sequential>
-      <!-- ensure we have Ivy enabled first -->
-      <setupIvy />
-
-      <local name="ivy.dep.file" />
-      <property name="ivy.dep.file" value="@{xml}" />
-
-      <condition property="ivy.xml">
-        <available file="@{xml}" type="file" />
-      </condition>
-
-      <!-- Start fetching dependencies -->
-      <ivy:retrieve if:set="ivy.xml" />
-
-    </sequential>
-  </macrodef>
-
   <macrodef name="loadConfiguredValues">
     <sequential>
       <condition property="local.properties" value="${HYBRIS_CONFIG_DIR}/local.properties">
@@ -231,6 +204,33 @@
     </sequential>
   </macrodef>
 
+<!--
+  ##########################################################################
+  #  Package Management via Ivy. 
+  ##########################################################################-->
+  <!-- According to the `ivy.xml` provided, install defined
+      packages accordingly. 
+   -->
+  <property name="ivy.home" value="${user.home}/.ant" />
+
+  <macrodef name="ivy-get">
+    <attribute name="xml" default="${basedir}/ivy.xml" />
+
+    <sequential>
+      <!-- ensure we have Ivy enabled first. -->
+      <setupIvy />
+      <!-- packages definitions xml. -->
+      <local name="ivy.dep.file" />
+      <property name="ivy.dep.file" value="@{xml}" />
+      <condition property="ivy.xml">
+        <available file="@{xml}" type="file" />
+      </condition>
+      <!-- Start fetching dependencies -->
+      <ivy:retrieve pattern="${ivy.home}/lib/[artifact]-[type]-[revision].[ext]" 
+                    if:set="ivy.xml" />
+    </sequential>
+  </macrodef>
+
   <macrodef name="setupIvy">
     <sequential>
       <!-- Ensure we have Ivy downloaded into Ant lib -->
@@ -243,11 +243,6 @@
             <resolvers>
               <chain name="chain">
                 <ibiblio name="central" m2compatible="true"/>
-                <ibiblio name="mvn-repos" m2compatible="true" root="http://repository.pentaho.org/artifactory/repo"/>
-                <filesystem name="local-mvn" m2compatible="true" local="true">
-                  <ivy pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
-                  <artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision].[ext]"/>
-                </filesystem>
               </chain>
           </resolvers>
         </ivysettings>
