@@ -36,7 +36,6 @@ testreport/
 ###############
 # Hybris Data #
 ###############
-config
 data
 log
 lib
@@ -62,10 +61,10 @@ Thumbs.db
 .vscode
 *.sublime-project
 *.sublime-workspace
-.idea
-eclipsebin
 .project
 .settings
+eclipsebin
+.idea
 idea-module-files/
 
 ##############
