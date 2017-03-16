@@ -22,6 +22,10 @@
   <!-- READONLY System environment variables -->
   <property environment="env"/>
 
+  <!-- Ivy dependencies manager -->
+  <property name="ivy.home" value="${user.home}/.ant" />
+  <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
     <os family="windows" />
@@ -197,9 +201,6 @@
       <!-- ensure we have Ivy enabled first -->
       <setupIvy />
 
-      <local name="ivy.home" />
-      <property name="ivy.home" value="${user.home}/.ant" />
-
       <local name="ivy.dep.file" />
       <property name="ivy.dep.file" value="@{xml}" />
 
@@ -232,7 +233,6 @@
 
   <macrodef name="setupIvy">
     <sequential>
-      <property name="ivy.home" value="${user.home}/.ant" />
       <!-- Ensure we have Ivy downloaded into Ant lib -->
       <download dest="${env.ANT_HOME}/lib/ivy-2.4.0.jar"
                 url="http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar" />
