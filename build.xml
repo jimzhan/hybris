@@ -417,6 +417,10 @@
     <ant dir="${platformhome}" target="build" />
   </target>
 
+  <target name="initialize" depends="lint">
+    <ant dir="${platformhome}" target="initialize" />
+  </target>
+
   <!-- TODO supports direct `-debug` flag? -->
   <target name="startHybrisServer" depends="-CONFIG">
   <!-- accept CLI argument to determine whether to run server in daemon mode. -->
