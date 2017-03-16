@@ -16,7 +16,8 @@
 
   - all Hybris OOTB [ant](http://ant.apache.org/) tasks.
   - handy/improved version of server related tasks. 
-  - custom package definition supports (defined via `ivy.xml`, automatically installed).
+  - package management supports via [apache ivy](http://ant.apache.org/ivy/).
+  - custom packages definition supports (defined via `ivy.xml`, automatically installed).
   - build-in static code analysis (pre-`build` and pre-`all`) supports via `checkstyle`.
     - ignored Hybris generated files.
     - check all custom `.java`, `.xml` and `.properties` sources.
@@ -37,12 +38,20 @@
   ant bootstrap
   ```
 
-`bootstrap` will first try load `.env` from `${basedir}` to provide additional settings supports, then pre-defined Hybris packages will be copied into `bin` folder. Two settings profiles will be generated under `config` folder afterward:
+`bootstrap` will:
+
+1. try load `.env` from `${basedir}` to provide additional settings supports;
+2. pre-defined (via `HYB_BIN_DIR`) Hybris packages will be copied into `bin` folder;
+3. Two settings profiles will be generated under `config` folder afterward:
 
 * `config/develop` - settings profile for development (default), generated via Hybris `develop` template.
 * `config/testing` - settings profile for online testing, generated via Hybris `production` template.
 
-**NOTE** you generate new/individual settings profile using following command:
+4. [apache ivy](http://ant.apache.org/ivy/) will be installed along with `checkstyle`.
+5. install custom dependencies defined in `${basedir}/ivy.xml` (if any).
+
+
+**NOTE** you can still generate new/individual settings profile using following command:
 
   ```bash
   ant createConfig -DHYBRIS_CONFIG_DIR=`pwd`/config/<profile> -Dinput.template=<develop|production>
