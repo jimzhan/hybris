@@ -27,7 +27,6 @@ hmc.xsd
 beans.xsd
 items.xsd
 extensioninfo.xsd
-project.properties
 platformhome.properties
 *-testclasses.xml
 classes/
