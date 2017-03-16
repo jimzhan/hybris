@@ -496,8 +496,5 @@
     <antcall target="startSolrServer" />
   </target>
 
-  <target name="play">
-    <fixcrlf tab="remove" srcdir="${basedir}/bin" />
-  </target>
-
 </project>
+
