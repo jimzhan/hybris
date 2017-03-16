@@ -91,3 +91,4 @@
 - [x] running server detections.
 - [x] Ivy package manager integration.
 - [x] checkstyle integration (pre-build).
+- [ ] auto-scope for testing.
