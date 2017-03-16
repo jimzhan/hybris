@@ -67,6 +67,9 @@ Thumbs.db
 eclipsebin
 .idea
 idea-module-files/
+.externalToolBuilders
+.springBeans
+.pmd
 
 ##############
 # Diff Files #
