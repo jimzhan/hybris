@@ -178,6 +178,7 @@
         <fileset dir="${check.base.dir}">
           <include name="**/*.java" />
           <include name="**/*.xml" />
+          <include name="**/*.properties" />
           <exclude name="**/*Constants.java" />
           <exclude name="**/*Standalone.java" />
           <exclude name="**/jalo/**" />

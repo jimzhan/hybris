@@ -19,7 +19,7 @@
   - custom package definition supports (defined via `ivy.xml`, automatically installed).
   - build-in static code analysis (pre-`build` and pre-`all`) supports via `checkstyle`.
     - ignored Hybris generated files.
-    - check all custom java and xml sources.
+    - check all custom `.java`, `.xml` and `.properties` sources.
   - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
     * passed in by CLI.
     * defined in System environment variables.
