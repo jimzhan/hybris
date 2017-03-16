@@ -344,11 +344,11 @@
     <echo message="======================================================================" />
     <echo message=" Start formatting all your source code (java | xml) in 5 seconds ..." />
     <echo message="======================================================================" />
-    <echo message="  * Convert all tabs to spaces. " />
-    <echo message="  * Convert all line breaks to LF. " />
-    <echo message="  * Restrict all tab sizes to 2. " />
-    <echo message="  * Remove all additional character from EOF. " />
+    <echo message="  * Convert all tabs to spaces (size: 2). " />
+    <echo message="  * Convert all EOLs to a single LF ">
+    <echo message="  * Remove any EOF character found at the end. ">
     <echo message="  * Add new line in each EOF. " />
+    <echo message="  * Add a missing EOL to the last line of a processed file. "/>
     <echo message="======================================================================" />
     <sleep seconds="5" />
 
