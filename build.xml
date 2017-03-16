@@ -149,6 +149,46 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="checkstyle">
+    <attribute name="dir" default="${basedir}/bin/custom" />
+
+    <sequential>
+      <local name="config" />
+      <property name="config" value="google_checks.xml" />
+      <echo>----------------------------------------------------------------------</echo>
+      <echo>  Start checking styles using `${config}` ...</echo>
+      <echo>----------------------------------------------------------------------</echo>
+      <local name="check.base.dir" />
+      <property name="check.base.dir" value="@{dir}" />
+
+      <local name="target.exists" />
+      <condition property="target.exists">
+        <available file="@{dir}" type="dir" />
+      </condition>
+
+      <mkdir dir="${basedir}/build" />
+      <lint:checkstyle config="/${config}"
+          failureProperty="checkstyle.failed"
+          failOnViolation="true"
+          maxErrors="0"
+          maxWarnings="0"
+          if:set="target.exists">
+        <formatter type="plain" />
+        <formatter type="xml" tofile="${basedir}/build/checkstyle.xml"/>
+        <fileset dir="${check.base.dir}">
+          <include name="**/*.java" />
+          <include name="**/*.xml" />
+          <exclude name="**/*Constants.java" />
+          <exclude name="**/*Standalone.java" />
+          <exclude name="**/jalo/**" />
+          <exclude name="**/gensrc/**" />
+          <exclude name="**/Generated**" />
+          <exclude name="**/ruleset.xml" />
+        </fileset>
+      </lint:checkstyle>
+    </sequential>
+  </macrodef>
+
   <macrodef name="download">
     <attribute name="url" />
     <attribute name="dest" />
@@ -298,36 +338,8 @@
     <ivy-get xml="${basedir}/ivy.xml" />
   </target>
 
-  <target name="-checkstyle" if="custom.exists">
-    <property name="style" value="google_checks.xml" />
-
-    <echo>----------------------------------------------------------------------</echo>
-    <echo>  Start checking styles using `${style}` ...</echo>
-    <echo>----------------------------------------------------------------------</echo>
-
-    <local name="check.base.dir" />
-    <property name="check.base.dir" value="${basedir}/bin/custom" />
-
-    <mkdir dir="${basedir}/build" />
-    <lint:checkstyle config="/${style}"
-        failureProperty="checkstyle.failed"
-        failOnViolation="true"
-        maxErrors="0"
-        maxWarnings="0">
-      <formatter type="plain" />
-      <formatter type="xml" tofile="${basedir}/build/checkstyle.xml"/>
-      <fileset dir="${check.base.dir}">
-        <include name="**/*.java" />
-        <exclude name="**/*Constants.java" />
-        <exclude name="**/*Standalone.java" />
-        <exclude name="**/jalo/**" />
-        <exclude name="**/gensrc/**" />
-        <exclude name="**/Generated**" />
-      </fileset>
-    </lint:checkstyle>
-  </target>
-
-  <target name="lint" depends="-checkstyle">
+  <target name="lint">
+    <checkstyle />
   </target>
 
   <target name="purge" description="clean up everything (except source.) back to stage 0">
