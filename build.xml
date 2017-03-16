@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="hybris" basedir="." default="build" 
     xmlns:if="ant:if" xmlns:unless="ant:unless"
-    xmlns:ivy="antlib:org.apache.ivy.ant">
+    xmlns:ivy="antlib:org.apache.ivy.ant"
+    xmlns:lint="antlib:com.puppycrawl.tools.checkstyle.ant">
   <!-- fixed and required by Hybris OOTB ant build.xml -->
   <property name="platformhome" location="${basedir}/bin/platform"/>
 <!--
@@ -54,6 +55,10 @@
   ##########################################################################-->
   <condition property="platform.exists">
     <available file="${platformhome}" type="dir" />
+  </condition>
+
+  <condition property="custom.exists">
+    <available file="${basedir}/bin/custom" type="dir" />
   </condition>
 
   <!-- import Hybris OOTB `ant` build.xml directly (if exists)
@@ -222,6 +227,8 @@
       <!-- packages definitions xml. -->
       <local name="ivy.dep.file" />
       <property name="ivy.dep.file" value="@{xml}" />
+
+      <local name="ivy.xml" />
       <condition property="ivy.xml">
         <available file="@{xml}" type="file" />
       </condition>
@@ -255,10 +262,10 @@
   #  Hybris Scaffoldings. 
   ##########################################################################-->
   <target name="-CONFIG">
-    <echo message="----------------------------------------------------------------------" />
-    <echo message="  `HYBRIS_CONFIG_DIR`  => ${HYBRIS_CONFIG_DIR}" />
-    <echo message="----------------------------------------------------------------------" />
-    <sleep seconds="1"/>
+    <echo>----------------------------------------------------------------------</echo>
+    <echo>`HYBRIS_CONFIG_DIR`  => ${HYBRIS_CONFIG_DIR}</echo>
+    <echo>----------------------------------------------------------------------</echo>
+    <sleep seconds="1" />
   </target>
 
   <target name="source" unless="platform.exists">
@@ -289,6 +296,37 @@
     <ivy-get xml="${dir.tmp}/ivy.xml" />
     <!-- Install Custom Dependencies. -->
     <ivy-get xml="${basedir}/ivy.xml" />
+  </target>
+
+  <target name="-checkstyle" if="custom.exists">
+    <property name="style" value="google_checks.xml" />
+
+    <echo>----------------------------------------------------------------------</echo>
+    <echo>  Start checking styles using `${style}` ...</echo>
+    <echo>----------------------------------------------------------------------</echo>
+
+    <local name="check.base.dir" />
+    <property name="check.base.dir" value="${basedir}/bin/custom" />
+
+    <lint:checkstyle config="/${style}"
+        failureProperty="checkstyle.failed"
+        failOnViolation="true"
+        maxErrors="0"
+        maxWarnings="0">
+      <formatter type="plain" />
+      <formatter type="xml" tofile="${basedir}/checkstyle.xml"/>
+      <fileset dir="${check.base.dir}">
+        <include name="**/*.java" />
+        <exclude name="**/*Constants.java" />
+        <exclude name="**/*Standalone.java" />
+        <exclude name="**/jalo/**" />
+        <exclude name="**/gensrc/**" />
+        <exclude name="**/Generated**" />
+      </fileset>
+    </lint:checkstyle>
+  </target>
+
+  <target name="lint" depends="-checkstyle">
   </target>
 
   <target name="purge" description="clean up everything (except source.) back to stage 0">
@@ -325,6 +363,14 @@
     <addons action="addonuninstall" />
   </target>
 
+  <target name="all" depends="lint">
+    <ant dir="${platformhome}" target="all" />
+  </target>
+
+  <target name="build" depends="lint">
+    <ant dir="${platformhome}" target="build" />
+  </target>
+
   <!-- TODO supports direct `-debug` flag? -->
   <target name="startHybrisServer" depends="-CONFIG">
   <!-- accept CLI argument to determine whether to run server in daemon mode. -->
@@ -334,9 +380,9 @@
         <equals arg1="${mode}" arg2="start"/>
       </and>
       <then>
-        <echo message="----------------------------------------------------------------------"/>
-        <echo message="  Starting Tomcat as daemon service ..."/>
-        <echo message="----------------------------------------------------------------------"/>
+        <echo>----------------------------------------------------------------------</echo>
+        <echo>  Starting Tomcat as daemon service ...</echo>
+        <echo>----------------------------------------------------------------------</echo>
         <execute cmd="${cmd.hybris}" dir="${platformhome}">
           <arg value="start" />
           <arg value="-DHYBRIS_CONFIG_DIR=${HYBRIS_CONFIG_DIR}" />
@@ -361,17 +407,17 @@
     <if>
       <isset property="tomcat.running" />
       <then>
-        <echo message="----------------------------------------------------------------------" />
-        <echo message="  Stopping Hybris Server. [port: ${tomcat.http.port}] " />
-        <echo message="----------------------------------------------------------------------" />
+        <echo>----------------------------------------------------------------------</echo>
+        <echo>  Stopping Hybris Server. [port: ${tomcat.http.port}]</echo>
+        <echo>----------------------------------------------------------------------</echo>
         <execute cmd="${cmd.hybris}" dir="${platformhome}">
           <arg value="stop" />
         </execute>
       </then>
       <else>
-        <echo level="warning" message="----------------------------------------------------------------------" />
-        <echo level="warning" message="  Hybris Server is not running. [port: ${tomcat.http.port}] " />
-        <echo level="warning" message="----------------------------------------------------------------------" />
+        <echo level="warning">----------------------------------------------------------------------</echo>
+        <echo level="warning">  Hybris Server is not running. [port: ${tomcat.http.port}]</echo>
+        <echo level="warning">----------------------------------------------------------------------</echo>
       </else>
     </if>
   </target>
@@ -386,15 +432,15 @@
     <if>
       <isset property="solrserver.running" />
       <then>
-        <echo message="----------------------------------------------------------------------" />
-        <echo message="  Stopping Solr Server. [port: ${solrserver.instances.default.port}] " />
-        <echo message="----------------------------------------------------------------------" />
+        <echo level="warning">----------------------------------------------------------------------</echo>
+        <echo level="warning">  Stopping Solr Server. [port: ${solrserver.instances.default.port}]</echo>
+        <echo level="warning">----------------------------------------------------------------------</echo>
         <ant dir="${platformhome}" target="stopSolrServer" />
       </then>
       <else>
-        <echo level="warning" message="----------------------------------------------------------------------" />
-        <echo level="warning" message="  Solr Server is not running. [port: ${solrserver.instances.default.port}] " />
-        <echo level="warning" message="----------------------------------------------------------------------" />
+        <echo level="warning">----------------------------------------------------------------------</echo>
+        <echo level="warning">  Solr Server is not running. [port: ${solrserver.instances.default.port}]</echo>
+        <echo level="warning">----------------------------------------------------------------------</echo>
       </else>
     </if>
   </target>
