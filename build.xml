@@ -339,6 +339,33 @@
     <ivy-get xml="${basedir}/ivy.xml" />
   </target>
 
+  <target name="format" if="custom.exists">
+    <echo message="======================================================================" />
+    <echo message=" Start formatting all your source code (java | xml) in 5 seconds ..." />
+    <echo message="======================================================================" />
+    <echo message="  * Convert all tabs to spaces. " />
+    <echo message="  * Convert all line breaks to LF. " />
+    <echo message="  * Restrict all tab sizes to 2. " />
+    <echo message="  * Remove all additional character from EOF. " />
+    <echo message="  * Add new line in each EOF. " />
+    <echo message="======================================================================" />
+    <sleep seconds="5" />
+
+    <fixcrlf eol="lf" eof="remove"
+             fixlast="true"
+             tab="remove"
+             tablength="2"
+             javafiles="yes"
+             includes="**/*.java"
+             srcdir="${basedir}/bin/custom" />
+    <fixcrlf eol="lf" eof="remove"
+             fixlast="true"
+             tab="remove"
+             tablength="2"
+             includes="**/*.xml"
+             srcdir="${basedir}/bin/custom" />
+  </target>
+
   <target name="lint">
     <checkstyle />
   </target>
@@ -363,7 +390,6 @@
     <delete dir="${basedir}/temp" />
     <delete file="${basedir}/velocity.log"/>
   </target>
-
 <!--
   ##########################################################################
   #  Hybris OOTB Targets MOD. 
@@ -468,6 +494,10 @@
   <target name="restartSolrServer">
     <antcall target="stopSolrServer" />
     <antcall target="startSolrServer" />
+  </target>
+
+  <target name="play">
+    <fixcrlf tab="remove" srcdir="${basedir}/bin" />
   </target>
 
 </project>

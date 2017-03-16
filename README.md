@@ -21,6 +21,7 @@
   - build-in static code analysis (pre-`build` and pre-`all`) supports via `checkstyle`.
     - ignored Hybris generated files.
     - check all custom `.java`, `.xml` and `.properties` sources.
+  - format helper to align with clean code.
   - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
     * passed in by CLI.
     * defined in System environment variables.
@@ -69,6 +70,7 @@
 ### Scaffoldings 
 
 - `bootstrap` - create a new instance with multi settings profiles supports (develop/develop, testing/production).
+- `format` - convert all custom sources code into better standarding (compliant with `google_checks.xml`).
 - `purge` - delete all generated data files and folders (`data`, `log`, `roles`, `temp` and `velocity.log`).
 
 
@@ -91,4 +93,5 @@
 - [x] running server detections.
 - [x] Ivy package manager integration.
 - [x] checkstyle integration (pre-build).
+- [x] format all source code into `google_checks.xml` compliant mode.
 - [ ] auto-scope for testing.
