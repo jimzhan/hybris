@@ -351,19 +351,25 @@
     <echo message="======================================================================" />
     <sleep seconds="5" />
 
+    <local name="tabsize" />
+    <property name="tabsize" value="2" />
+
+    <local name="srcdir" />
+    <property name="srcdir" value="${basedir}/bin/custom" />
+
     <fixcrlf eol="lf" eof="remove"
              fixlast="true"
              tab="remove"
-             tablength="2"
+             tablength="${tabsize}"
              javafiles="yes"
              includes="**/*.java"
-             srcdir="${basedir}/bin/custom" />
+             srcdir="${srcdir}" />
     <fixcrlf eol="lf" eof="remove"
              fixlast="true"
              tab="remove"
-             tablength="2"
+             tablength="${tabsize}"
              includes="**/*.xml"
-             srcdir="${basedir}/bin/custom" />
+             srcdir="${srcdir}" />
   </target>
 
   <target name="lint">
