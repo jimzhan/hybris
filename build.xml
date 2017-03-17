@@ -32,6 +32,11 @@
   <property name="dir.bin"    value="${basedir}/bin" />
   <property name="dir.config" value="${basedir}/config" />
   <property name="dir.tmp"    value="${java.io.tmpdir}"/>
+  <condition property="dir.custom" 
+             value="${dir.custom}" 
+             else="${dir.bin}/custom">
+    <isset property="dir.custom" />
+  </condition>
 
   <!-- Native Hybris config profiles - CLI > System.env > default. -->
   <condition property="HYBRIS_CONFIG_DIR" 
@@ -75,6 +80,11 @@
     <available file="${basedir}/.env" type="file" />
   </condition>
   <loadproperties srcfile="${basedir}/.env" if:set="dotenv.exists" />
+
+  <!-- for source code formatting -->
+  <condition property="tabsize" value="${tabsize}" else="2">
+    <isset property="tabsize" />
+  </condition>
 
 <!--
   ##########################################################################
@@ -234,6 +244,39 @@
     </sequential>
   </macrodef>
 
+  <!--
+    - Convert all tabs to spaces (size: 2).
+    - Convert all EOLs to a single LF.
+    - Remove any EOF character found at the end.
+    - Add a missing EOL to the last line of a processed file. 
+    *NOTE* by default, format the .java and .xml source files 
+    under `bin/custom` folder unless `dir.custom` passed in.
+  -->
+  <macrodef name="format">
+    <attribute name="wait" default="1" />
+
+    <sequential>
+      <echo>----------------------------------------------------------------------</echo>
+      <echo>  Start formatting source code under `${dir.custom}` ...</echo>
+      <echo>----------------------------------------------------------------------</echo>
+      <sleep seconds="@{wait}" />
+
+      <fixcrlf eol="lf" eof="remove"
+              fixlast="true"
+              tab="remove"
+              tablength="${tabsize}"
+              javafiles="yes"
+              includes="**/*.java"
+              srcdir="${dir.custom}" />
+      <fixcrlf eol="lf" eof="remove"
+              fixlast="true"
+              tab="remove"
+              tablength="${tabsize}"
+              includes="**/*.xml"
+              srcdir="${dir.custom}" />
+    </sequential>
+  </macrodef>
+
   <macrodef name="loadConfiguredValues">
     <sequential>
       <condition property="local.properties" value="${HYBRIS_CONFIG_DIR}/local.properties">
@@ -340,40 +383,11 @@
     <ivy-get xml="${basedir}/ivy.xml" />
   </target>
 
-  <target name="format" if="custom.exists">
-    <echo message="======================================================================" />
-    <echo message=" Start formatting all your source code (java | xml) in 5 seconds ..." />
-    <echo message="======================================================================" />
-    <echo message="  * Convert all tabs to spaces (size: 2). " />
-    <echo message="  * Convert all EOLs to a single LF "/>
-    <echo message="  * Remove any EOF character found at the end. "/>
-    <echo message="  * Add new line in each EOF. " />
-    <echo message="  * Add a missing EOL to the last line of a processed file. "/>
-    <echo message="======================================================================" />
-    <sleep seconds="5" />
-
-    <local name="tabsize" />
-    <property name="tabsize" value="2" />
-
-    <local name="srcdir" />
-    <property name="srcdir" value="${basedir}/bin/custom" />
-
-    <fixcrlf eol="lf" eof="remove"
-             fixlast="true"
-             tab="remove"
-             tablength="${tabsize}"
-             javafiles="yes"
-             includes="**/*.java"
-             srcdir="${srcdir}" />
-    <fixcrlf eol="lf" eof="remove"
-             fixlast="true"
-             tab="remove"
-             tablength="${tabsize}"
-             includes="**/*.xml"
-             srcdir="${srcdir}" />
+  <target name="format">
+    <format wait="3" />
   </target>
 
-  <target name="lint">
+  <target name="lint" depends="format">
     <checkstyle />
   </target>
 
@@ -508,4 +522,3 @@
   </target>
 
 </project>
-
