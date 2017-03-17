@@ -32,11 +32,7 @@
   <property name="dir.bin"    value="${basedir}/bin" />
   <property name="dir.config" value="${basedir}/config" />
   <property name="dir.tmp"    value="${java.io.tmpdir}"/>
-  <condition property="dir.custom" 
-             value="${dir.custom}" 
-             else="${dir.bin}/custom">
-    <isset property="dir.custom" />
-  </condition>
+  <property name="dir.custom" value="${dir.bin}/custom" unless:set="dir.custom" />
 
   <!-- Native Hybris config profiles - CLI > System.env > default. -->
   <condition property="HYBRIS_CONFIG_DIR" 
@@ -58,6 +54,8 @@
   ##########################################################################
   #  Project Settings. 
   ##########################################################################-->
+  <property name="ivy.home" value="${user.home}/.ant" />
+
   <condition property="platform.exists">
     <available file="${platformhome}" type="dir" />
   </condition>
@@ -81,11 +79,6 @@
   </condition>
   <loadproperties srcfile="${basedir}/.env" if:set="dotenv.exists" />
 
-  <!-- for source code formatting -->
-  <condition property="tabsize" value="${tabsize}" else="2">
-    <isset property="tabsize" />
-  </condition>
-
 <!--
   ##########################################################################
   #  Functional Helpers. 
@@ -95,11 +88,11 @@
   -->
   <property name="regex.addons" value="(y\w+storefront)\.([^\.]*)\.addonnames" />
   <propertyselector property="addons"
-      delimiter=","
-      distinct="true"
-      casesensitive="false"
-      match="${regex.addons}"
-      select="\0" />
+                    delimiter=","
+                    distinct="true"
+                    casesensitive="false"
+                    match="${regex.addons}"
+                    select="\0" />
   <!-- By following pattern (<template>.<storefront>.addonnames=<addons,...> 
     Automatically (un)install all pre-defined addon extensions (if any). -->
   <macrodef name="addons">
@@ -111,15 +104,15 @@
           <for list="${addons}" param="config">
             <sequential>
               <propertyregex override="yes"
-                  property="template"  
-                  input="@{config}"
-                  regexp="${regex.addons}"
-                  select="\1" />
+                             property="template"  
+                             input="@{config}"
+                             regexp="${regex.addons}"
+                             select="\1" />
               <propertyregex override="yes"
-                  property="storefront"  
-                  input="@{config}"
-                  regexp="${regex.addons}"
-                  select="\2"/>
+                             property="storefront"  
+                             input="@{config}"
+                             regexp="${regex.addons}"
+                             select="\2"/>
               <ant dir="${platformhome}" target="@{action}">
                 <property name="addonnames" value="${@{config}}" />
                 <property name="addonStorefront.${template}" value="${storefront}" />
@@ -160,7 +153,7 @@
   </macrodef>
 
   <macrodef name="checkstyle">
-    <attribute name="dir" default="${basedir}/bin/custom" />
+    <attribute name="dir" default="${dir.custom}" />
 
     <sequential>
       <local name="config" />
@@ -178,11 +171,11 @@
 
       <mkdir dir="${basedir}/build" />
       <lint:checkstyle config="/${config}"
-          failureProperty="checkstyle.failed"
-          failOnViolation="true"
-          maxErrors="0"
-          maxWarnings="0"
-          if:set="target.exists">
+                       failureProperty="checkstyle.failed"
+                       failOnViolation="true"
+                       maxErrors="0"
+                       maxWarnings="0"
+                       if:set="target.exists">
         <formatter type="plain" />
         <formatter type="xml" tofile="${basedir}/build/checkstyle.xml"/>
         <fileset dir="${check.base.dir}">
@@ -245,6 +238,43 @@
   </macrodef>
 
   <!--
+    Find all custom extensions in folder `dir.custom`.
+    @return in a comma-separated extensions list in String. 
+    TODO - Find actual extensions defined in `localextensions.xml`,
+    otherwise, extensions those are not included in `localextensions.xml`
+    are not recognized by Hybris platform.
+  -->
+  <macrodef name="findCustomExtensions">
+    <sequential>
+      <resources id="custom.extensions">
+        <fileset dir="${dir.custom}" includes="**/extensioninfo.xml" />
+      </resources>
+
+      <var name="out" value="" /> 
+      <for list="${toString:custom.extensions}" param="ext" delimiter=":">
+        <sequential>
+          <propertyregex override="yes"
+                        property="extension"  
+                        input="@{ext}"
+                        regexp=".*(\/|\\)(.*)(\/|\\)(extensioninfo\.xml)"
+                        select="\2" />
+          <if>
+            <equals arg1="${out}" arg2="" />
+            <then>
+              <var name="out" value="${extension}" />
+            </then>
+            <else>
+              <var name="out" value="${out},${extension}" />
+            </else>
+          </if>
+        </sequential>
+      </for>
+
+      <property name="custom.extensions" value="${out}" />
+    </sequential>
+  </macrodef>
+
+  <!--
     - Convert all tabs to spaces (size: 2).
     - Convert all EOLs to a single LF.
     - Remove any EOF character found at the end.
@@ -254,6 +284,8 @@
   -->
   <macrodef name="format">
     <attribute name="wait" default="1" />
+    <!-- for source code formatting -->
+    <property name="tabsize" value="2" unless:set="tabsize" />
 
     <sequential>
       <echo>----------------------------------------------------------------------</echo>
@@ -262,18 +294,18 @@
       <sleep seconds="@{wait}" />
 
       <fixcrlf eol="lf" eof="remove"
-              fixlast="true"
-              tab="remove"
-              tablength="${tabsize}"
-              javafiles="yes"
-              includes="**/*.java"
-              srcdir="${dir.custom}" />
+               fixlast="true"
+               tab="remove"
+               tablength="${tabsize}"
+               javafiles="yes"
+               includes="**/*.java"
+               srcdir="${dir.custom}" />
       <fixcrlf eol="lf" eof="remove"
-              fixlast="true"
-              tab="remove"
-              tablength="${tabsize}"
-              includes="**/*.xml"
-              srcdir="${dir.custom}" />
+               fixlast="true"
+               tab="remove"
+               tablength="${tabsize}"
+               includes="**/*.xml"
+               srcdir="${dir.custom}" />
     </sequential>
   </macrodef>
 
@@ -301,13 +333,10 @@
   <!-- According to the `ivy.xml` provided, install defined
       packages accordingly. 
    -->
-  <property name="ivy.home" value="${user.home}/.ant" />
-
   <macrodef name="ivy-get">
     <attribute name="xml" default="${basedir}/ivy.xml" />
 
     <sequential>
-      <!-- ensure we have Ivy enabled first. -->
       <setupIvy />
       <!-- packages definitions xml. -->
       <local name="ivy.dep.file" />
@@ -320,6 +349,24 @@
       <!-- Start fetching dependencies -->
       <ivy:retrieve pattern="${ivy.home}/lib/[artifact]-[type]-[revision].[ext]" 
                     if:set="ivy.xml" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="TestRunner">
+    <attribute name="action" />
+
+    <sequential>
+      <findCustomExtensions />
+      <!-- ignore Hybirs/SAP packages for tests -->
+      <local name="testclasses.packages.excluded" />
+      <property name="testclasses.packages.excluded" 
+                value="com.hybris.*,de.hybris.platform*.com.sap*" 
+                unless:set="testclasses.packages.excluded" />
+
+      <ant dir="${platformhome}" target="@{action}">
+        <property name="testclasses.packages.excluded" value="${testclasses.packages.excluded}" />
+        <property name="testclasses.extensions" value="${custom.extensions}" />
+      </ant>
     </sequential>
   </macrodef>
 
@@ -384,7 +431,7 @@
   </target>
 
   <target name="format">
-    <format wait="3" />
+    <format />
   </target>
 
   <target name="lint" depends="format">
@@ -519,6 +566,21 @@
   <target name="restartSolrServer">
     <antcall target="stopSolrServer" />
     <antcall target="startSolrServer" />
+  </target>
+
+  <!--
+    ........................................................................
+    Test related target MOD to provide self-introspection for custom extensions.
+    -Dtestclasses.extensions
+    -Dtestclasses.packages.excluded
+    ........................................................................
+  -->
+  <target name="integrationtests" if="custom.exists">
+    <TestRunner action="integrationtests" />
+  </target>
+
+  <target name="unittests" if="custom.exists">
+    <TestRunner action="unittests" />
   </target>
 
 </project>

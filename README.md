@@ -30,12 +30,12 @@
     * Convert all EOLs to a single LF.
     * Remove any EOF character found at the end.
     * Add a missing EOL to the last line of a processed file.
-
   - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
     * passed in by CLI.
     * defined in System environment variables.
     * default settings profile - `config/develop`.
-  - `.env` based `addoninstall` and `addonuninstall` supports, pattern:
+  - self introspection for `unittests` and `integrationtests`, Hybris OOTB packages excluded and custom packages included automatically. :neckbeard: **NOTE** custom extensions need to be defined in `localextensions.xml`.
+  - `.env` based `addoninstall` and `addonuninstall` supports, pattern: 
 
     ```bash 
     <template>.<storefront>.addonnames = <addon-a>,<addon-b>,<addon-c>
@@ -75,6 +75,9 @@
 - `restartSolrServer` - provides shortcut for stop-n-start current Solr server.
 - `startHybrisServer` - starts Hybris server at the foreground (default) or background (via `-Dmode=start`, synonym to tomcat arguments).
 - `stopHybrisServer` - stops Hybris server at the background (if any).
+- `unitests` - OOTB Hybris `unittests` tasks with self-introspection supports.
+- `integrationtests` - OOTB Hybris `unittests` tasks with self-introspection supports.
+  
 
 ### Scaffoldings 
 
@@ -104,4 +107,5 @@
 - [x] Ivy package manager integration.
 - [x] checkstyle integration (pre-build).
 - [x] format all source code into `google_checks.xml` compliant mode.
-- [ ] auto-scope for testing.
+- [x] auto-scope for testing.
+- [ ] `localextensions.xml` introspections.
