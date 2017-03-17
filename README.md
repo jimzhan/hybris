@@ -25,7 +25,7 @@
   - build-in static code analysis (pre-`build` and pre-`all`) supports via `checkstyle`.
     - ignored Hybris generated files.
     - check all custom `.java`, `.xml` and `.properties` sources.
-  - format helper to align with clean code (integrated into `lint`).
+  - format helper to align with clean code (integrated into `lint`). :neckbeard:
     * Convert all tabs to spaces (size: 2).
     * Convert all EOLs to a single LF.
     * Remove any EOF character found at the end.
@@ -79,7 +79,7 @@
 ### Scaffoldings 
 
 - `bootstrap` - create a new instance with multi settings profiles supports (develop/develop, testing/production).
-- `format` - convert all custom sources code into better standards (compliant with `google_checks.xml`).
+- `format` - convert all custom sources code into better standards (compliant with `google_checks.xml`). :heart:
 - `lint` - static code analysis via `google_checks.xml` (pre-`format` integrated).
 - `purge` - delete all generated data files and folders (`data`, `log`, `roles`, `temp` and `velocity.log`).
 
