@@ -4,13 +4,17 @@
 
 ### Prequiresites
 
-  - Java SDK Version >= v8
-  - `ANT_HOME` defined in System environment variables (version >= 1.9.0).
-  - `ANT_OPTS` defined in System environment variables (OPTIONAL), e.g. `-Xmx1024m -Dfile.encoding=UTF-8`.
-  - `HYB_BIN_DIR` defined and appointed to your local Hybris `bin` package by the following orders:
-    * passed in by CLI.
-    * defined in System environment variables.
-    * defined in `.env` (ignored by `.gitignore`).
+  :small_blue_diamond: `JAVA_HOME` defined in System environment variables (version >= 8.0).
+  
+  :small_blue_diamond: `ANT_HOME` defined in System environment variables (version >= 1.9.0).
+  
+  :small_blue_diamond: `ANT_OPTS` defined in System environment variables (OPTIONAL), e.g. `-Xmx1024m -Dfile.encoding=UTF-8`.
+  
+  :small_blue_diamond: `HYB_BIN_DIR` defined and appointed to your local Hybris `bin` package by the following orders:
+    
+    1. passed in by CLI.
+    2. defined in System environment variables. 
+    3. defined in `.env` (ignored by `.gitignore`).
 
 ### Features
 
@@ -25,7 +29,6 @@
     * Convert all tabs to spaces (size: 2).
     * Convert all EOLs to a single LF.
     * Remove any EOF character found at the end.
-    * Add new line in each EOF. 
     * Add a missing EOL to the last line of a processed file.
 
   - multi settings profile via `HYBRIS_CONFIG_DIR` by following order:
