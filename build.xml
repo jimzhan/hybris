@@ -43,7 +43,7 @@
   </condition>
 
   <!-- Hybris package source directory - CLI > System.env. -->
-  <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_SRC"/>
+  <property name="HYB_BIN_DIR" value="${env.HYB_BIN_DIR}" unless:set="HYB_BIN_DIR"/>
   <fail unless="HYB_BIN_DIR" message="`HYB_BIN_DIR` undefined." />
 
   <!-- try load Hybris OOTB `ant-contrib`. -->
@@ -584,3 +584,4 @@
   </target>
 
 </project>
+
