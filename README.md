@@ -76,7 +76,7 @@
 - `startHybrisServer` - starts Hybris server at the foreground (default) or background (via `-Dmode=start`, synonym to tomcat arguments).
 - `stopHybrisServer` - stops Hybris server at the background (if any).
 - `unitests` - OOTB Hybris `unittests` tasks with self-introspection supports.
-- `integrationtests` - OOTB Hybris `unittests` tasks with self-introspection supports.
+- `integrationtests` - OOTB Hybris `integrationtests` tasks with self-introspection supports.
   
 
 ### Scaffoldings 
