@@ -284,8 +284,6 @@
   -->
   <macrodef name="format">
     <attribute name="wait" default="1" />
-    <!-- for source code formatting -->
-    <property name="tabsize" value="2" unless:set="tabsize" />
 
     <sequential>
       <echo>----------------------------------------------------------------------</echo>
@@ -293,6 +291,8 @@
       <echo>----------------------------------------------------------------------</echo>
       <sleep seconds="@{wait}" />
 
+      <!-- for source code formatting -->
+      <property name="tabsize" value="2" unless:set="tabsize" />
       <fixcrlf eol="lf" eof="remove"
                fixlast="true"
                tab="remove"
