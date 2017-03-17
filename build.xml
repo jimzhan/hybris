@@ -22,6 +22,7 @@
   ##########################################################################-->
   <!-- READONLY System environment variables -->
   <property environment="env"/>
+  <antversion property="ant.running.version" atleast="1.9" />
 
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
@@ -424,10 +425,21 @@
         </dependencies>
       </ivy-module>
     </echoxml>
+
     <!-- Install Project Dependencies. -->
     <ivy-get xml="${dir.tmp}/ivy.xml" />
     <!-- Install Custom Dependencies. -->
     <ivy-get xml="${basedir}/ivy.xml" />
+
+    <loadproperties srcfile="${platformhome}/build.number" prefix="hybris" />
+    <echo message="======================================================================" />
+    <echo message=" ███████╗███╗   ██╗██╗   ██╗  | OS family:       ${os.name}" />
+    <echo message=" ██╔════╝████╗  ██║██║   ██║  | Java Platform:   ${java.version}" />
+    <echo message=" █████╗  ██╔██╗ ██║██║   ██║  | Ant Version:     ${ant.running.version}" />
+    <echo message=" ██╔══╝  ██║╚██╗██║╚██╗ ██╔╝  | Ant Home:        ${env.ANT_HOME}" />
+    <echo message=" ███████╗██║ ╚████║ ╚████╔╝   | --------------------------------------" />
+    <echo message=" ╚══════╝╚═╝  ╚═══╝  ╚═══╝    | Hybris Version:  ${hybris.version}" />
+    <echo message="======================================================================" />
   </target>
 
   <target name="format">
