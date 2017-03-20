@@ -98,6 +98,7 @@
     Automatically (un)install all pre-defined addon extensions (if any). -->
   <macrodef name="addons">
     <attribute name="action" />
+
     <sequential>
       <if>
         <isset property="addons" />
@@ -239,11 +240,101 @@
   </macrodef>
 
   <!--
+    Find all configured extension (supports both `dir` and `name`)
+    in `localextension.xml` via current settings profile.
+
+      DEFINE in `property` -> `configured.extensions`.
+  -->
+  <macrodef name="findConfiguredExtensions">
+    <sequential>
+      <xmlproperty file="${HYBRIS_CONFIG_DIR}/localextensions.xml" collapseAttributes="true" />
+      <condition property="exts.by.dir" value="${hybrisconfig.extensions.extension.dir}" else="">
+        <isset property="hybrisconfig.extensions.extension.dir" />
+      </condition>
+      <condition property="exts.by.name" value="${hybrisconfig.extensions.extension.name}" else="">
+        <isset property="hybrisconfig.extensions.extension.name" />
+      </condition>
+
+      <var name="out" value="" />
+      <for list="${exts.by.dir}" param="item" delimiter=",">
+        <sequential>
+          <propertyregex override="yes"
+                         property="extension"  
+                         input="@{item}"
+                         regexp=".*(\/)(\w+)"
+                         select="\2" />
+          <if>
+            <equals arg1="${out}" arg2="" />
+            <then>
+              <var name="out" value="${extension}" />
+            </then>
+            <else>
+              <var name="out" value="${out},${extension}" if:set="extension" />
+            </else>
+          </if>
+        </sequential>
+      </for>
+
+      <if>
+        <equals arg1="${out}" arg2="" />
+        <then>
+          <var name="out" value="${exts.by.name}" />
+        </then>
+        <else>
+          <if>
+            <not><equals arg1="${exts.by.name}" arg2="" /></not>
+            <then>
+              <var name="out" value="${out},${exts.by.name}" />
+            </then>
+          </if>
+        </else>
+      </if>
+
+      <property name="configured.extensions" value="${out}" />
+    </sequential>
+  </macrodef>
+
+  <!--
+    Find all custom extensions which are configured in `localextensions.xml`
+    via current settings profile.
+    
+    @return ONLY those custom extensions configured in `localextensions.xml`.
+      DEFINE in `property` -> `configured.custom.extensions`.
+  -->
+  <macrodef name="findConfiguredCustomExtensions">
+    <sequential>
+      <findConfiguredExtensions />
+      <findCustomExtensions />
+
+      <var name="out" value="" />
+      <for list="${custom.extensions}" param="ext" delimiter=",">
+        <sequential>
+          <if>
+            <contains string="${configured.extensions}" substring="@{ext}" />
+            <then>
+              <if>
+                <equals arg1="${out}" arg2="" />
+                <then>
+                  <var name="out" value="@{ext}" />
+                </then>
+                <else>
+                  <var name="out" value="${out},@{ext}" />
+                </else>
+              </if>
+            </then>
+          </if>
+        </sequential>
+      </for>
+
+      <property name="configured.custom.extensions" value="${out}" />
+    </sequential>
+  </macrodef>
+
+  <!--
     Find all custom extensions in folder `dir.custom`.
     @return in a comma-separated extensions list in String. 
-    TODO - Find actual extensions defined in `localextensions.xml`,
-    otherwise, extensions those are not included in `localextensions.xml`
-    are not recognized by Hybris platform.
+
+      DEFINE in `property` -> `custom.extensions`.
   -->
   <macrodef name="findCustomExtensions">
     <sequential>
@@ -255,10 +346,10 @@
       <for list="${toString:custom.extensions}" param="ext" delimiter=":">
         <sequential>
           <propertyregex override="yes"
-                        property="extension"  
-                        input="@{ext}"
-                        regexp=".*(\/|\\)(.*)(\/|\\)(extensioninfo\.xml)"
-                        select="\2" />
+                         property="extension"  
+                         input="@{ext}"
+                         regexp=".*(\/|\\)(.*)(\/|\\)(extensioninfo\.xml)"
+                         select="\2" />
           <if>
             <equals arg1="${out}" arg2="" />
             <then>
@@ -353,24 +444,6 @@
     </sequential>
   </macrodef>
 
-  <macrodef name="TestRunner">
-    <attribute name="action" />
-
-    <sequential>
-      <findCustomExtensions />
-      <!-- ignore Hybirs/SAP packages for tests -->
-      <local name="testclasses.packages.excluded" />
-      <property name="testclasses.packages.excluded" 
-                value="com.hybris.*,de.hybris.platform*.com.sap*" 
-                unless:set="testclasses.packages.excluded" />
-
-      <ant dir="${platformhome}" target="@{action}">
-        <property name="testclasses.packages.excluded" value="${testclasses.packages.excluded}" />
-        <property name="testclasses.extensions" value="${custom.extensions}" />
-      </ant>
-    </sequential>
-  </macrodef>
-
   <macrodef name="setupIvy">
     <sequential>
       <!-- Ensure we have Ivy downloaded into Ant lib -->
@@ -387,6 +460,24 @@
           </resolvers>
         </ivysettings>
       </echoxml>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="TestRunner">
+    <attribute name="action" />
+
+    <sequential>
+      <findConfiguredCustomExtensions />
+      <!-- ignore Hybirs/SAP packages for tests -->
+      <local name="testclasses.packages.excluded" />
+      <property name="testclasses.packages.excluded" 
+                value="com.hybris.*,de.hybris.platform*.com.sap*" 
+                unless:set="testclasses.packages.excluded" />
+
+      <ant dir="${platformhome}" target="@{action}">
+        <property name="testclasses.packages.excluded" value="${testclasses.packages.excluded}" />
+        <property name="testclasses.extensions" value="${configured.custom.extensions}" />
+      </ant>
     </sequential>
   </macrodef>
 
@@ -587,6 +678,10 @@
     -Dtestclasses.packages.excluded
     ........................................................................
   -->
+  <target name="alltests" if="custom.exists">
+    <TestRunner action="alltests" />
+  </target>
+
   <target name="integrationtests" if="custom.exists">
     <TestRunner action="integrationtests" />
   </target>
@@ -596,4 +691,3 @@
   </target>
 
 </project>
-
