@@ -575,11 +575,7 @@
     <addons action="addonuninstall" />
   </target>
 
-  <target name="all" depends="lint">
-    <ant dir="${platformhome}" target="all">
-      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
-    </ant>
-  </target>
+  <target name="all" depends="build,server" />
 
   <target name="build" depends="lint">
     <ant dir="${platformhome}" target="build">
