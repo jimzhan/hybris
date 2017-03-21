@@ -1,26 +1,51 @@
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
 * text eol=lf
 
-# These files are binary and should be left untouched
-# (binary is a macro for -text -diff)
-*.png   binary
-*.jpg   binary
-*.jpeg  binary
-*.gif   binary
-*.ico   binary
-*.mov   binary
-*.mp4   binary
-*.mp3   binary
-*.flv   binary
-*.fla   binary
-*.swf   binary
-*.gz    binary
-*.zip   binary
-*.7z    binary
-*.ttf   binary
-*.eot   binary
-*.woff   binary
-*.jar   binary
+# These files are text and should be normalized (Convert crlf => lf)
+*.css           text
+*.df            text
+*.htm           text
+*.html          text
+*.java          text
+*.js            text
+*.json          text
+*.jsp           text
+*.jspf          text
+*.jspx          text
+*.properties    text
+*.sh            text
+*.tld           text
+*.txt           text
+*.tag           text
+*.tagx          text
+*.xml           text
 
+## These files are binary and should be left untouched
+# (binary is a macro for -text -diff)
+*.class         binary
+*.dll           binary
+*.ear           binary
+*.gif           binary
+*.ico           binary
+*.jar           binary
+*.jpg           binary
+*.jpeg          binary
+*.png           binary
+*.so            binary
+*.mov           binary
+*.mp4           binary
+*.mp3           binary
+*.flv           binary
+*.fla           binary
+*.swf           binary
+*.gz            binary
+*.zip           binary
+*.7z            binary
+*.ttf           binary
+*.eot           binary
+*.war           binary
+*.woff          binary
 
 # Documents
 *.doc  diff=astextplain
@@ -33,3 +58,4 @@
 *.PDF  diff=astextplain
 *.rtf  diff=astextplain
 *.RTF  diff=astextplain
+
