@@ -23,6 +23,11 @@
   <!-- READONLY System environment variables -->
   <property environment="env"/>
   <antversion property="ant.running.version" atleast="1.9" />
+  <!-- dotenv supports -->
+  <condition property="dotenv.exists">
+    <available file="${basedir}/.env" type="file" />
+  </condition>
+  <loadproperties srcfile="${basedir}/.env" if:set="dotenv.exists" />
 
   <!-- common commands -->
   <condition property="cmd.hybris" value="hybrisserver.bat" else="./hybrisserver.sh">
@@ -73,12 +78,6 @@
       <import file="${platformhome}/build.xml" optional="true" />
     </then>
   </if>
-
-  <!-- dotenv supports -->
-  <condition property="dotenv.exists">
-    <available file="${basedir}/.env" type="file" />
-  </condition>
-  <loadproperties srcfile="${basedir}/.env" if:set="dotenv.exists" />
 
 <!--
   ##########################################################################
