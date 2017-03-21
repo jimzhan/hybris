@@ -532,7 +532,7 @@
     <echo message="======================================================================" />
   </target>
 
-  <target name="format">
+  <target name="format" if="custom.exists">
     <format />
   </target>
 
