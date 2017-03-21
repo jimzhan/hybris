@@ -117,6 +117,7 @@
               <ant dir="${platformhome}" target="@{action}">
                 <property name="addonnames" value="${@{config}}" />
                 <property name="addonStorefront.${template}" value="${storefront}" />
+                <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
               </ant>
             </sequential>
           </for>
@@ -474,8 +475,9 @@
                 unless:set="testclasses.packages.excluded" />
 
       <ant dir="${platformhome}" target="@{action}">
-        <property name="testclasses.packages.excluded" value="${testclasses.packages.excluded}" />
+        <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
         <property name="testclasses.extensions" value="${configured.custom.extensions}" />
+        <property name="testclasses.packages.excluded" value="${testclasses.packages.excluded}" />
       </ant>
     </sequential>
   </macrodef>
@@ -574,15 +576,21 @@
   </target>
 
   <target name="all" depends="lint">
-    <ant dir="${platformhome}" target="all" />
+    <ant dir="${platformhome}" target="all">
+      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
+    </ant>
   </target>
 
   <target name="build" depends="lint">
-    <ant dir="${platformhome}" target="build" />
+    <ant dir="${platformhome}" target="build">
+      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
+    </ant>
   </target>
 
   <target name="initialize" depends="lint">
-    <ant dir="${platformhome}" target="initialize" />
+    <ant dir="${platformhome}" target="initialize">
+      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
+    </ant>
   </target>
 
   <!-- TODO supports direct `-debug` flag? -->
