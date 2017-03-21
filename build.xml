@@ -575,7 +575,10 @@
     <addons action="addonuninstall" />
   </target>
 
-  <target name="all" depends="build,server" />
+  <target name="all">
+    <antcall target="build" />
+    <antcall target="server" />
+  </target>
 
   <target name="build" depends="lint">
     <ant dir="${platformhome}" target="build">
