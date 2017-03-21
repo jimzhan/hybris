@@ -592,6 +592,13 @@
     </ant>
   </target>
 
+  <target name="server">
+    <execute cmd="ant" dir="${platformhome}">
+      <arg value="server" />
+      <arg value="-DHYBRIS_CONFIG_DIR=${HYBRIS_CONFIG_DIR}" />
+    </execute>
+  </target>
+
   <!-- TODO supports direct `-debug` flag? -->
   <target name="startHybrisServer" depends="-CONFIG">
   <!-- accept CLI argument to determine whether to run server in daemon mode. -->
