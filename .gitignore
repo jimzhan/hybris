@@ -21,6 +21,7 @@ hs_err_pid*
 bin/*
 !bin/custom/
 gensrc/
+jalo/
 build.xml
 velocity.log
 hmc.xsd
