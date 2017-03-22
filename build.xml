@@ -78,8 +78,6 @@
       <import file="${platformhome}/build.xml" optional="true" />
     </then>
   </if>
-  <!-- direct access to OOTB macros for further customizations -->
-  <import file="${platformhome}/resources/ant/antmacros.xml"/>
 
 <!--
   ##########################################################################
@@ -579,26 +577,15 @@
 
   <target name="all">
     <antcall target="build" />
-    <antcall target="server" />
+    <antcall target="server" inheritRefs="true" />
   </target>
 
   <target name="build" depends="lint">
-    <ant dir="${platformhome}" target="build">
-      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
-    </ant>
+    <ant dir="${platformhome}" target="build" />
   </target>
 
   <target name="initialize" depends="lint">
-    <ant dir="${platformhome}" target="initialize">
-      <property name="HYBRIS_CONFIG_DIR" value="${HYBRIS_CONFIG_DIR}" />
-    </ant>
-  </target>
-
-  <target name="server">
-    <!-- direct access to OOTB macro to avoid missing `yinternal.tomcat.contexts`. -->
-		<callback extname="" target="before_server" />
-		<deploy />
-		<callback extname="" target="after_server" />
+    <ant dir="${platformhome}" target="initialize" />
   </target>
 
   <!-- TODO supports direct `-debug` flag? -->
