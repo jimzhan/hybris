@@ -584,8 +584,8 @@
     <ant dir="${platformhome}" target="build" />
   </target>
 
-  <target name="initialize" depends="lint">
-    <ant dir="${platformhome}" target="initialize" />
+  <target name="initialize" depends="all">
+    <inittenant />
   </target>
 
   <!-- TODO supports direct `-debug` flag? -->
